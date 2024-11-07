@@ -1,0 +1,15 @@
+@import "../variable.scss";
+
+.UserLayout {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+
+@media (min-width: $breakpoint-xl) {
+  .UserLayout {
+    height: $MainContentHeight;
+  }
+}
