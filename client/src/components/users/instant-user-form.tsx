@@ -18,7 +18,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "@/components/ui/select";
 import { useState } from "react";
 import { userType } from "@/apps/users";
 
@@ -33,7 +33,19 @@ export const InstantUserForm = ({
   open,
   onOpenChange,
 }: InstantUserFormProps) => {
-  const [newUser, setNewUser] = useState<userType>();
+  const [newUser, setNewUser] = useState<Partial<userType>>({
+    firstName: "",
+    lastName: "",
+    roles: [],
+    isLocked: false,
+  });
+
+  const handleInputChange = (
+    field: keyof userType,
+    value: string | boolean | Date | string[],
+  ) => {
+    setNewUser({ ...newUser, [field]: value });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,13 +57,24 @@ export const InstantUserForm = ({
         <div>
           <div className="flex flex-col justify-center items-center gap-4">
             <FormFieldWrapper LabelText="FirstName" Important className="gap-2">
-              <Input placeholder="Enter first name" />
+              <Input
+                placeholder="Enter first name"
+                value={newUser.firstName || ""}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+              />
             </FormFieldWrapper>
             <FormFieldWrapper LabelText="LastName" Important className="gap-2">
-              <Input placeholder="Enter last name" />
+              <Input
+                placeholder="Enter last name"
+                value={newUser.lastName || ""}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+              />
             </FormFieldWrapper>
             <FormFieldWrapper LabelText="Role" Important className="gap-2">
-              <Select>
+              <Select
+                onValueChange={(value) => handleInputChange("roles", [value])}
+                value={newUser.roles?.[0] || ""}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
@@ -66,6 +89,22 @@ export const InstantUserForm = ({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </FormFieldWrapper>
+            <FormFieldWrapper LabelText="Email" className="gap-2">
+              <Input
+                type="email"
+                placeholder="Enter email"
+                value={newUser.email || ""}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+              />
+            </FormFieldWrapper>
+            <FormFieldWrapper LabelText="Phone" className="gap-2">
+              <Input
+                type="tel"
+                placeholder="Enter phone number"
+                value={newUser.phone || ""}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+              />
             </FormFieldWrapper>
           </div>
         </div>

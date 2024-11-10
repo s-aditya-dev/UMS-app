@@ -30,8 +30,8 @@ export const UserAction = ({
     <DropdownMenuContent>
       <DropdownMenuLabel>Actions</DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => handleShowPass(user.uid)}>
-        {showPass === user.uid ? "Hide password" : "Show password"}
+      <DropdownMenuItem onClick={() => handleShowPass(user._id)}>
+        {showPass === user._id ? "Hide password" : "Show password"}
       </DropdownMenuItem>
       <DropdownMenuItem>Delete User</DropdownMenuItem>
       <DropdownMenuSeparator />
