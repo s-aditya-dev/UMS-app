@@ -10,7 +10,7 @@ export const NavLinks = [
     pageName: "Users",
     icon: "UserRound",
     label: "Users",
-    to: "/users/1",
+    to: "/users",
   },
   {
     pageName: "Analytics",

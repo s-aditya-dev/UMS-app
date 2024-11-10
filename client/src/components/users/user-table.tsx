@@ -1,14 +1,6 @@
 import { userType } from "@/apps/users";
 import { Card } from "@/components/ui/card";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Table,
   TableBody,
   TableCell,
@@ -16,15 +8,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Ellipsis } from "lucide-react";
+import { UserAction } from "@/components/users/user-actions";
 import { useState } from "react";
-import { Button } from "../ui/button";
 
 interface UserTableProps {
   userList: userType[];
+  firstIndex: number;
 }
 
-export const UserTable = ({ userList }: UserTableProps) => {
+export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
   const [showPass, setShowPass] = useState<string>("");
 
   const handleShowPassword = (uid: string) => {
@@ -49,49 +41,28 @@ export const UserTable = ({ userList }: UserTableProps) => {
         <TableBody>
           {userList.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center">
+              <TableCell colSpan={8} className="text-center">
                 No users found
               </TableCell>
             </TableRow>
           ) : (
             userList.map((user, index) => (
-              <TableRow key={user.uid} className="hover:bg-card">
-                <TableCell>{index + 1}</TableCell>
+              <TableRow key={user._id} className="hover:bg-card">
+                <TableCell>{firstIndex + index + 1}</TableCell>
                 <TableCell>{user.firstName + " " + user.lastName}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>
-                  {showPass === user.uid ? user.password : "••••••••"}
+                  {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
                 <TableCell>Active</TableCell>
-                <TableCell>Locked</TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
+                <TableCell>{user.roles[0]}</TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        size="miniIcon"
-                        onClick={() => handleShowPassword(user.uid)}
-                      >
-                        <Ellipsis />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleShowPassword(user.uid)}
-                      >
-                        {showPass === user.uid
-                          ? "Hide password"
-                          : "Show password"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>Delete User</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Open Details</DropdownMenuItem>
-                      <DropdownMenuItem>Quick preview</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <UserAction
+                    user={user}
+                    showPass={showPass}
+                    handleShowPass={handleShowPassword}
+                  />
                 </TableCell>
               </TableRow>
             ))

@@ -15,16 +15,28 @@ import { UserFilterButton } from "./user-filter-button";
 interface UserHeaderProp {
   filter: string;
   setFilter: (value: string) => void;
-  pageno: string | number | undefined;
+  currPage: number;
+  nPage: number;
+  nthClick: (pageNo: number) => void;
+  prevClick: () => void;
+  nextClick: () => void;
 }
 
-export const UserHeader = ({ filter, setFilter, pageno }: UserHeaderProp) => {
+export const UserHeader = ({
+  filter,
+  setFilter,
+  currPage,
+  nPage,
+  nthClick,
+  prevClick,
+  nextClick,
+}: UserHeaderProp) => {
   const handleFilterChange = (value: string) => {
     setFilter(value);
   };
 
   return (
-    <div className="w-full flex justify-around sm:justify-between items-center gap-2 flex-wrap">
+    <div className="w-full flex justify-around md:justify-between items-center gap-2 flex-wrap">
       <div className="flex gap-2">
         <Input
           placeholder="Search users"
@@ -36,23 +48,39 @@ export const UserHeader = ({ filter, setFilter, pageno }: UserHeaderProp) => {
         <UserAddButton />
       </div>
 
-      <h2 className="font-semibold">Rocord Count : {pageno}</h2>
+      <h2 className="font-semibold">Rocord Count : </h2>
 
       <Card className="p-1 px-1.5">
         <Pagination>
           <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
+            {currPage != 1 && (
+              <>
+                <PaginationItem className="cursor-pointer">
+                  <PaginationPrevious onClick={() => prevClick()} />
+                </PaginationItem>
+                <PaginationItem className="cursor-pointer">
+                  <PaginationLink onClick={() => nthClick(1)}>1</PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+            {currPage != 1 ||
+              (currPage != nPage && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              ))}
+            {currPage != nPage && (
+              <>
+                <PaginationItem className="cursor-pointer">
+                  <PaginationLink onClick={() => nthClick(nPage)}>
+                    {nPage}
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem className="cursor-pointer">
+                  <PaginationNext onClick={() => nextClick()} />
+                </PaginationItem>
+              </>
+            )}
           </PaginationContent>
         </Pagination>
       </Card>

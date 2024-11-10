@@ -44,9 +44,10 @@ const MainBody: React.FC<MainProps> = ({
   const componentMapping: { [key: string]: JSX.Element } = {
     dashboard: <Maintainance />,
     analytics: <Maintainance />,
+    "users/": <UserList />,
     "users/:pageno": <UserList />,
-    "add-user": <Maintainance />,
-    "edit-user/:id": <Maintainance />,
+    "users/form": <Maintainance />,
+    "users/details/:id": <Maintainance />,
     "client-list/:pageno": <Maintainance />,
     "dump-client-list": <Maintainance />,
     "new-client-list": <Maintainance />,
