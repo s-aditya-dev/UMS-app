@@ -1,36 +1,35 @@
-import React from "react";
-import PropTypes from "prop-types";
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
+  AlertDialogDescription,
   AlertDialogFooter,
+  AlertDialogHeader,
   AlertDialogIcon,
   AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import * as Icons from "lucide-react";
+import { ReactNode } from "react";
 
 type AlertType = "Danger" | "Warn" | "Success" | "Info";
 
 interface DialogWithIconProps {
   iconName: keyof typeof Icons;
-  alertType: AlertType;
+  alertType?: AlertType;
   title: string;
   description: string;
   cancelLabel?: string;
   actionLabel?: string;
   onCancel?: () => void;
   onAction?: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function DialogWithIcon({
   iconName,
-  alertType,
+  alertType = "Danger",
   title,
   description,
   cancelLabel,
@@ -68,32 +67,3 @@ export function DialogWithIcon({
     </AlertDialog>
   );
 }
-
-DialogWithIcon.propTypes = {
-  iconName: PropTypes.oneOf(Object.keys(Icons) as (keyof typeof Icons)[])
-    .isRequired,
-  alertType: PropTypes.oneOf(["Danger", "Warn", "Success", "Info"]).isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  cancelLabel: PropTypes.string,
-  actionLabel: PropTypes.string,
-  onCancel: PropTypes.func,
-  onAction: PropTypes.func,
-  children: PropTypes.node.isRequired,
-};
-
-// Example Usage:-
-{/* <DialogWithIcon
-  iconName="AlertCircle" // Specify the icon name from lucide-react
-  alertType="Danger" // Specify the alert type
-  title="Delete Item"
-  description="Are you sure you want to delete this item? This action cannot be undone."
-
-  //buttons are not required if the label or the action of that button is not provided the button wont load
-  cancelLabel="Cancel"
-  onCancel={() => console.log("canceled")}
-  actionLabel="Delete"
-  onAction={() => console.log("action")}
->
-  <button className="btn btn-danger">Delete</button>
-</DialogWithIcon>; */}

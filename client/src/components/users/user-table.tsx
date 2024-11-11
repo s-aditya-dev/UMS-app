@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { UserAction } from "@/components/users/user-actions";
 import { useState } from "react";
+import { Badge } from "../ui/badge";
 
 interface UserTableProps {
   userList: userType[];
@@ -29,7 +30,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
         <TableHeader>
           <TableRow>
             <TableHead>#</TableHead>
-            <TableHead>Employee Name</TableHead>
+            <TableHead className="whitespace-nowrap">Employee Name</TableHead>
             <TableHead>Username</TableHead>
             <TableHead>Password</TableHead>
             <TableHead>Status</TableHead>
@@ -49,12 +50,16 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
             userList.map((user, index) => (
               <TableRow key={user._id} className="hover:bg-card">
                 <TableCell>{firstIndex + index + 1}</TableCell>
-                <TableCell>{user.firstName + " " + user.lastName}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {user.firstName + " " + user.lastName}
+                </TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>
                   {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
-                <TableCell>Active</TableCell>
+                <TableCell>
+                  <Badge className={`bg-green-400`}>Active</Badge>
+                </TableCell>
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
                 <TableCell>{user.roles[0]}</TableCell>
                 <TableCell>

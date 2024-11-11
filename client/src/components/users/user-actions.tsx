@@ -9,6 +9,7 @@ import {
 import { Ellipsis } from "lucide-react";
 import { Button } from "../ui/button";
 import { userType } from "@/apps/users";
+import { useNavigate } from "react-router-dom";
 
 interface UserActionProps {
   user: userType;
@@ -20,23 +21,34 @@ export const UserAction = ({
   user,
   showPass,
   handleShowPass,
-}: UserActionProps) => (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="secondary" size="miniIcon">
-        <Ellipsis />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => handleShowPass(user._id)}>
-        {showPass === user._id ? "Hide password" : "Show password"}
-      </DropdownMenuItem>
-      <DropdownMenuItem>Delete User</DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>Open Details</DropdownMenuItem>
-      <DropdownMenuItem>Quick preview</DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-);
+}: UserActionProps) => {
+  // Hooks
+  const navigate = useNavigate();
+
+  // Event Handlers
+  const handleOpenDetails = (id: string) => {
+    navigate(`details/${id}`);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary" size="miniIcon">
+          <Ellipsis />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => handleShowPass(user._id)}>
+          {showPass === user._id ? "Hide password" : "Show password"}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => handleOpenDetails(user._id)}>
+          Open Details
+        </DropdownMenuItem>
+        <DropdownMenuItem>Quick preview</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};

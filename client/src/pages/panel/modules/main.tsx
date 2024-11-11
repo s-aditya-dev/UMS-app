@@ -1,12 +1,14 @@
+import { Dashboard } from "@/apps/dashboard";
+import { Task } from "@/apps/task";
+import { UserDetails } from "@/apps/user-details";
+import { UserList } from "@/apps/users";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { cn } from "@/lib/utils";
+import { ProtectedRoute } from "@/utils/Protected Route";
 import * as React from "react";
 import { useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useLocation, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/utils/Protected Route";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Task } from "@/apps/task";
-import { UserList } from "@/apps/users";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
@@ -42,12 +44,12 @@ const MainBody: React.FC<MainProps> = ({
   };
 
   const componentMapping: { [key: string]: JSX.Element } = {
-    dashboard: <Maintainance />,
+    dashboard: <Dashboard />,
     analytics: <Maintainance />,
     "users/": <UserList />,
     "users/:pageno": <UserList />,
     "users/form": <Maintainance />,
-    "users/details/:id": <Maintainance />,
+    "users/:pageno/details/:id": <UserDetails />,
     "client-list/:pageno": <Maintainance />,
     "dump-client-list": <Maintainance />,
     "new-client-list": <Maintainance />,
@@ -87,10 +89,7 @@ const MainBody: React.FC<MainProps> = ({
   }, [currPath]); // currPath is the only dependency, but exhaustive-deps might want other dependencies
 
   useEffect(() => {
-    setBreadcrumbs([
-      { to: `/panel/${currContent.toLowerCase()}`, label: currContent },
-      { label: "Form" },
-    ]);
+    setBreadcrumbs([{ label: currContent }]);
   }, [setBreadcrumbs, currContent]);
 
   return (

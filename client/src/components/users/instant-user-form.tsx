@@ -1,3 +1,4 @@
+import { userType } from "@/apps/users";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,19 +11,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { userType } from "@/apps/users";
+import { z } from "zod";
+import { MultiSelect } from "../custom ui/multi-select";
+import { formatZodErrors } from "@/utils/zodUtils";
 
-const roles = ["admin", "user", "manager"];
+const roles = [
+  { label: "Admin", value: "admin" },
+  { label: "Users", value: "user" },
+  { label: "Manager", value: "manager" },
+];
+
+const instantUserScheme = z.object({
+  username: z.string(),
+  password: z.string(),
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  roles: z.array(z.string()).min(1),
+  isLocked: z.boolean(),
+});
 
 interface InstantUserFormProps {
   open: boolean;
@@ -33,18 +41,64 @@ export const InstantUserForm = ({
   open,
   onOpenChange,
 }: InstantUserFormProps) => {
-  const [newUser, setNewUser] = useState<Partial<userType>>({
+  // Hooks
+  const { toast } = useToast();
+
+  // use States
+  const [newUser, setNewUser] = useState<userType>({
+    username: "",
+    password: "",
     firstName: "",
     lastName: "",
     roles: [],
     isLocked: false,
   });
 
+  // util functions
+  const generateUsername = (firstName: string) => {
+    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
+    return `${firstName}${randomDigits}`;
+  };
+
+  const generatePassword = () => {
+    return Math.random().toString(36).slice(-8); // Generates random 8-char password
+  };
+
+  // Event Handlers
   const handleInputChange = (
     field: keyof userType,
-    value: string | boolean | Date | string[],
+    value: string | string[],
   ) => {
     setNewUser({ ...newUser, [field]: value });
+  };
+
+  const handleCreateUser = () => {
+    const username = generateUsername(newUser.firstName || "");
+    const password = generatePassword();
+
+    const user = {
+      ...newUser,
+      username,
+      password,
+    };
+
+    const validation = instantUserScheme.safeParse(user);
+
+    if (!validation.success) {
+      const errorMessages = formatZodErrors(validation.error.errors);
+
+      toast({
+        title: "Form Validation Error",
+        description: `Please correct the following errors:\n${errorMessages}`,
+        variant: "warning",
+      });
+      return;
+    }
+
+    //Actual user creation logic goes here
+    console.log("User created:", instantUserScheme.safeParse(user));
+
+    onOpenChange(false);
   };
 
   return (
@@ -70,40 +124,14 @@ export const InstantUserForm = ({
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
               />
             </FormFieldWrapper>
-            <FormFieldWrapper LabelText="Role" Important className="gap-2">
-              <Select
-                onValueChange={(value) => handleInputChange("roles", [value])}
-                value={newUser.roles?.[0] || ""}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>User Roles</SelectLabel>
-                    {roles.map((role, index) => (
-                      <SelectItem key={index} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </FormFieldWrapper>
-            <FormFieldWrapper LabelText="Email" className="gap-2">
-              <Input
-                type="email"
-                placeholder="Enter email"
-                value={newUser.email || ""}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-              />
-            </FormFieldWrapper>
-            <FormFieldWrapper LabelText="Phone" className="gap-2">
-              <Input
-                type="tel"
-                placeholder="Enter phone number"
-                value={newUser.phone || ""}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+            <FormFieldWrapper LabelText="Roles" Important className="gap-2">
+              <MultiSelect
+                options={roles}
+                defaultValue={newUser?.roles || []}
+                onValueChange={(value) => handleInputChange("roles", value)}
+                placeholder="Select participants"
+                variant="inverted"
+                maxCount={3}
               />
             </FormFieldWrapper>
           </div>
@@ -112,9 +140,7 @@ export const InstantUserForm = ({
           <DialogClose asChild>
             <Button variant="secondary">Cancel</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button>Create</Button>
-          </DialogClose>
+          <Button onClick={handleCreateUser}>Create</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

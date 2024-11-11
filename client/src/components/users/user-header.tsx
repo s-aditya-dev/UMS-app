@@ -11,6 +11,7 @@ import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { UserAddButton } from "./user-add-button";
 import { UserFilterButton } from "./user-filter-button";
+import { UserSortButton } from "./user-sort-button";
 
 interface UserHeaderProp {
   filter: string;
@@ -20,6 +21,7 @@ interface UserHeaderProp {
   nthClick: (pageNo: number) => void;
   prevClick: () => void;
   nextClick: () => void;
+  recordLabel: string;
 }
 
 export const UserHeader = ({
@@ -30,6 +32,7 @@ export const UserHeader = ({
   nthClick,
   prevClick,
   nextClick,
+  recordLabel,
 }: UserHeaderProp) => {
   const handleFilterChange = (value: string) => {
     setFilter(value);
@@ -48,42 +51,46 @@ export const UserHeader = ({
         <UserAddButton />
       </div>
 
-      <h2 className="font-semibold">Rocord Count : </h2>
+      <h2 className="font-semibold text-lg">{recordLabel}</h2>
 
-      <Card className="p-1 px-1.5">
-        <Pagination>
-          <PaginationContent>
-            {currPage != 1 && (
-              <>
-                <PaginationItem className="cursor-pointer">
-                  <PaginationPrevious onClick={() => prevClick()} />
-                </PaginationItem>
-                <PaginationItem className="cursor-pointer">
-                  <PaginationLink onClick={() => nthClick(1)}>1</PaginationLink>
-                </PaginationItem>
-              </>
-            )}
-            {currPage != 1 ||
-              (currPage != nPage && (
+      <div className="flex justify-center items-center flex-wrap gap-2">
+        <UserSortButton />
+        <Card className="p-1 px-1.5">
+          <Pagination>
+            <PaginationContent>
+              {currPage != 1 && (
+                <>
+                  <PaginationItem className="cursor-pointer">
+                    <PaginationPrevious onClick={() => prevClick()} />
+                  </PaginationItem>
+                  <PaginationItem className="cursor-pointer">
+                    <PaginationLink onClick={() => nthClick(1)}>
+                      1
+                    </PaginationLink>
+                  </PaginationItem>
+                </>
+              )}
+              {currPage != 1 && currPage != nPage && (
                 <PaginationItem>
                   <PaginationEllipsis />
                 </PaginationItem>
-              ))}
-            {currPage != nPage && (
-              <>
-                <PaginationItem className="cursor-pointer">
-                  <PaginationLink onClick={() => nthClick(nPage)}>
-                    {nPage}
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem className="cursor-pointer">
-                  <PaginationNext onClick={() => nextClick()} />
-                </PaginationItem>
-              </>
-            )}
-          </PaginationContent>
-        </Pagination>
-      </Card>
+              )}
+              {currPage != nPage && (
+                <>
+                  <PaginationItem className="cursor-pointer">
+                    <PaginationLink onClick={() => nthClick(nPage)}>
+                      {nPage}
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem className="cursor-pointer">
+                    <PaginationNext onClick={() => nextClick()} />
+                  </PaginationItem>
+                </>
+              )}
+            </PaginationContent>
+          </Pagination>
+        </Card>
+      </div>
     </div>
   );
 };

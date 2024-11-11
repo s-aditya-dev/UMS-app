@@ -1,19 +1,21 @@
+import { UserFooter } from "@/components/users/user-footer";
 import { UserHeader } from "@/components/users/user-header";
 import { UserTable } from "@/components/users/user-table";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { userList } from "./user-list";
 
 export type userType = {
-  _id: string;
+  _id?: string;
   username: string;
   password: string;
   firstName: string;
   lastName: string;
   roles: string[];
-  dob: Date;
+  dob?: Date;
   email?: string;
-  phone?: string;
+  phone?: number;
   isLocked: boolean;
   permissions?: object;
 };
@@ -21,13 +23,13 @@ export type userType = {
 export const UserList = () => {
   // Hooks
   const navigate = useNavigate();
+  const { setBreadcrumbs } = useBreadcrumb();
   const { pageno } = useParams();
 
   // use States
   const [data, setData] = useState<userType[]>([]);
   const [filter, setFilter] = useState("");
   const [currPage, setCurrPage] = useState(pageno ? parseInt(pageno, 10) : 1);
-  console.log(currPage);
 
   // Pagination code
   const recordsPerPage = 5;
@@ -39,6 +41,10 @@ export const UserList = () => {
   );
   const npages = Math.ceil(data.length / recordsPerPage);
 
+  // Variables
+  const recordLabel = `Rocord Count : ${firstIndex + 1}-${lastIndex} of ${data.length}`;
+
+  // Event Handlers
   function handleNextPage() {
     if (currPage < npages) {
       setCurrPage(+currPage + 1);
@@ -64,9 +70,13 @@ export const UserList = () => {
     }
   }
 
-  //use Effects
+  // use Effects
   useEffect(() => {
     setData(userList);
+    setBreadcrumbs([{ label: "Users" }]);
+
+    // Sets the default page to 1
+    if (!pageno) navigate("1");
   }, []);
 
   return (
@@ -79,8 +89,11 @@ export const UserList = () => {
         nPage={npages}
         filter={filter}
         setFilter={setFilter}
+        recordLabel={recordLabel}
       />
       <UserTable userList={records} firstIndex={firstIndex} />
+
+      <UserFooter currPage={currPage} npages={npages} />
     </div>
   );
 };
