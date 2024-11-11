@@ -7,7 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { userList } from "./user-list";
 
 export type userType = {
-  _id?: string;
+  _id: string;
   username: string;
   password: string;
   firstName: string;

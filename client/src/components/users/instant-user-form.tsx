@@ -45,7 +45,7 @@ export const InstantUserForm = ({
   const { toast } = useToast();
 
   // use States
-  const [newUser, setNewUser] = useState<userType>({
+  const [newUser, setNewUser] = useState<Partial<userType>>({
     username: "",
     password: "",
     firstName: "",
