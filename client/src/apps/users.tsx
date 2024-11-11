@@ -15,7 +15,7 @@ export type userType = {
   roles: string[];
   dob?: Date;
   email?: string;
-  phone?: number;
+  phone?: string;
   isLocked: boolean;
   permissions?: object;
 };
