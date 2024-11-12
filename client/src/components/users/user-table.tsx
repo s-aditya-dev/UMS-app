@@ -58,7 +58,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                   {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
                 <TableCell>
-                  <Badge className={`bg-green-400`}>Active</Badge>
+                  <Badge variant={`success`}>Active</Badge>
                 </TableCell>
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
                 <TableCell>{user.roles[0]}</TableCell>

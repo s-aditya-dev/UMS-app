@@ -2,9 +2,11 @@ import { UserFooter } from "@/components/users/user-footer";
 import { UserHeader } from "@/components/users/user-header";
 import { UserTable } from "@/components/users/user-table";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { usePagination } from "@/hooks/use-pagination";
 import { userList } from "./user-list";
+import { search } from "@/utils/searchUtils";
 
 export type userType = {
   _id: string;
@@ -21,78 +23,89 @@ export type userType = {
 };
 
 export const UserList = () => {
+  // use States
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [data, setData] = useState<userType[]>([]);
+  const [results, setResults] = useState<userType[]>([]);
+
   // Hooks
-  const navigate = useNavigate();
   const { setBreadcrumbs } = useBreadcrumb();
   const { pageno } = useParams();
-
-  // use States
-  const [data, setData] = useState<userType[]>([]);
-  const [filter, setFilter] = useState("");
-  const [currPage, setCurrPage] = useState(pageno ? parseInt(pageno, 10) : 1);
-
-  // Pagination code
-  const recordsPerPage = 5;
-  const lastIndex = currPage * recordsPerPage;
-  const firstIndex = lastIndex - recordsPerPage;
-  const records = useMemo(
-    () => data.slice(firstIndex, lastIndex),
-    [data, firstIndex, lastIndex],
-  );
-  const npages = Math.ceil(data.length / recordsPerPage);
-
-  // Variables
-  const recordLabel = `Rocord Count : ${firstIndex + 1}-${lastIndex} of ${data.length}`;
+  const navigate = useNavigate();
+  const {
+    setPageData,
+    currPage,
+    setCurrPage,
+    records,
+    npages,
+    firstIndex,
+    recordCounter,
+    handleNextPage,
+    handlePreviousPage,
+    handleNthPage,
+  } = usePagination(data, 5, pageno ? parseInt(pageno, 10) : 1);
 
   // Event Handlers
-  function handleNextPage() {
-    if (currPage < npages) {
-      setCurrPage(+currPage + 1);
-      navigate(`/panel/users/${+currPage + 1}`);
-    }
-  }
+  const navigateToNextPage = () => {
+    handleNextPage();
+    navigate(`/panel/users/${currPage + 1}`);
+  };
 
-  function handlePreviousPage() {
-    if (currPage > 1) {
-      setCurrPage(+currPage - 1);
-      navigate(`/panel/users/${+currPage - 1}`);
-    }
-  }
+  const navigateToPreviousPage = () => {
+    handlePreviousPage();
+    navigate(`/panel/users/${currPage - 1}`);
+  };
 
-  function handleNthPage(nthPageNumber: number) {
-    if (
-      nthPageNumber !== currPage &&
-      nthPageNumber >= 1 &&
-      nthPageNumber <= npages
-    ) {
-      setCurrPage(nthPageNumber);
-      navigate(`/panel/users/${nthPageNumber}`);
-    }
-  }
+  const navigateToNthPage = (nthPageNumber: number) => {
+    handleNthPage(nthPageNumber);
+    navigate(`/panel/users/${nthPageNumber}`);
+  };
 
-  // use Effects
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
+    if (term) {
+      const filteredResults = search(data, term, [
+        "firstName",
+        "lastName",
+        "username",
+      ]);
+      setPageData(filteredResults);
+    } else setPageData(data);
+    navigateToNthPage(1);
+  };
+
   useEffect(() => {
-    setData(userList);
+    const tempData = userList;
+    setData(tempData);
+    setResults(tempData);
+    setPageData(tempData);
     setBreadcrumbs([{ label: "Users" }]);
-
-    // Sets the default page to 1
-    if (!pageno) navigate("1");
   }, []);
+
+  useEffect(() => {
+    if (!pageno) {
+      navigate("1");
+      setCurrPage(1);
+    }
+  }, [pageno]);
+
+  useEffect(() => {
+    setResults(records);
+  }, [records]);
 
   return (
     <div className="w-full flex items-center flex-col gap-2">
       <UserHeader
-        nthClick={handleNthPage}
-        prevClick={handlePreviousPage}
-        nextClick={handleNextPage}
+        nthClick={navigateToNthPage}
+        prevClick={navigateToPreviousPage}
+        nextClick={navigateToNextPage}
         currPage={currPage}
         nPage={npages}
-        filter={filter}
-        setFilter={setFilter}
-        recordLabel={recordLabel}
+        searchTerm={searchTerm}
+        setSearchTerm={handleSearchChange}
+        recordLabel={recordCounter}
       />
-      <UserTable userList={records} firstIndex={firstIndex} />
-
+      <UserTable userList={results} firstIndex={firstIndex} />
       <UserFooter currPage={currPage} npages={npages} />
     </div>
   );

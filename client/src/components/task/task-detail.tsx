@@ -1,28 +1,29 @@
-import React, { ReactNode } from "react";
 import { EventType } from "@/components/calendar/calendarFunc";
-import moment from "moment";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetTrigger,
   SheetClose,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetDescription,
   SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import {
+  Activity,
+  ArrowUpDown,
   CalendarClock,
+  CircleAlert,
   Clock,
   Flag,
-  ArrowUpDown,
-  Activity,
-  UsersRound,
   UserRoundPen,
-  CircleAlert,
+  UsersRound,
 } from "lucide-react";
+import moment from "moment";
+import React, { ReactNode } from "react";
+import { Badge } from "../ui/badge";
 import { TaskForm } from "./task-form";
 
 interface TaskDetailsProps {
@@ -31,7 +32,10 @@ interface TaskDetailsProps {
 }
 
 export function TaskDetails({ children, Event }: TaskDetailsProps) {
-  const isEventRange = !moment(Event.start.toISOString()).isSame(Event.end.toISOString(), "day");
+  const isEventRange = !moment(Event.start.toISOString()).isSame(
+    Event.end.toISOString(),
+    "day",
+  );
 
   function formatDate(start: Date, end: Date) {
     const startMoment = moment(start);
@@ -114,12 +118,7 @@ export function TaskDetails({ children, Event }: TaskDetailsProps) {
           <div className="flex gap-1 flex-wrap whitespace-nowrap">
             {Event.participants.map((participant, index) => (
               <React.Fragment key={index}>
-                <span
-                  key={index}
-                  className="border-2 px-2 rounded-full bg-primary text-secondary font-semibold text-sm"
-                >
-                  {participant}
-                </span>
+                <Badge variant="primary">{participant}</Badge>
               </React.Fragment>
             ))}
           </div>
@@ -140,7 +139,10 @@ export function TaskDetails({ children, Event }: TaskDetailsProps) {
           </SheetClose>
           {Event.status === "Incomplete" ? (
             <SheetClose asChild>
-              <Button variant="default" onClick={() => handleEventMark(Event.id)}>
+              <Button
+                variant="default"
+                onClick={() => handleEventMark(Event.id)}
+              >
                 Mark Completed
               </Button>
             </SheetClose>

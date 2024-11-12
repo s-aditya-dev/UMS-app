@@ -14,8 +14,10 @@ import { UserFilterButton } from "./user-filter-button";
 import { UserSortButton } from "./user-sort-button";
 
 interface UserHeaderProp {
-  filter: string;
-  setFilter: (value: string) => void;
+  // filter: string;
+  // setFilter: (value: string) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
   currPage: number;
   nPage: number;
   nthClick: (pageNo: number) => void;
@@ -25,8 +27,10 @@ interface UserHeaderProp {
 }
 
 export const UserHeader = ({
-  filter,
-  setFilter,
+  // filter,
+  // setFilter,
+  searchTerm,
+  setSearchTerm,
   currPage,
   nPage,
   nthClick,
@@ -34,8 +38,8 @@ export const UserHeader = ({
   nextClick,
   recordLabel,
 }: UserHeaderProp) => {
-  const handleFilterChange = (value: string) => {
-    setFilter(value);
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
   };
 
   return (
@@ -44,8 +48,8 @@ export const UserHeader = ({
         <Input
           placeholder="Search users"
           className="max-w-xs"
-          value={filter}
-          onChange={(e) => handleFilterChange(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
         <UserFilterButton />
         <UserAddButton />
@@ -53,43 +57,45 @@ export const UserHeader = ({
 
       <h2 className="font-semibold text-lg">{recordLabel}</h2>
 
-      <div className="flex justify-center items-center flex-wrap gap-2">
+      <div className="flex justify-center items-center flex-wrap-reverse gap-2">
         <UserSortButton />
-        <Card className="p-1 px-1.5">
-          <Pagination>
-            <PaginationContent>
-              {currPage != 1 && (
-                <>
-                  <PaginationItem className="cursor-pointer">
-                    <PaginationPrevious onClick={() => prevClick()} />
+        {nPage > 1 && (
+          <Card className="p-1 px-1.5">
+            <Pagination>
+              <PaginationContent>
+                {currPage != 1 && (
+                  <>
+                    <PaginationItem className="cursor-pointer">
+                      <PaginationPrevious onClick={() => prevClick()} />
+                    </PaginationItem>
+                    <PaginationItem className="cursor-pointer">
+                      <PaginationLink onClick={() => nthClick(1)}>
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+                  </>
+                )}
+                {currPage != 1 && currPage != nPage && (
+                  <PaginationItem>
+                    <PaginationEllipsis />
                   </PaginationItem>
-                  <PaginationItem className="cursor-pointer">
-                    <PaginationLink onClick={() => nthClick(1)}>
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                </>
-              )}
-              {currPage != 1 && currPage != nPage && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              {currPage != nPage && (
-                <>
-                  <PaginationItem className="cursor-pointer">
-                    <PaginationLink onClick={() => nthClick(nPage)}>
-                      {nPage}
-                    </PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem className="cursor-pointer">
-                    <PaginationNext onClick={() => nextClick()} />
-                  </PaginationItem>
-                </>
-              )}
-            </PaginationContent>
-          </Pagination>
-        </Card>
+                )}
+                {currPage != nPage && (
+                  <>
+                    <PaginationItem className="cursor-pointer">
+                      <PaginationLink onClick={() => nthClick(nPage)}>
+                        {nPage}
+                      </PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem className="cursor-pointer">
+                      <PaginationNext onClick={() => nextClick()} />
+                    </PaginationItem>
+                  </>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </Card>
+        )}
       </div>
     </div>
   );
