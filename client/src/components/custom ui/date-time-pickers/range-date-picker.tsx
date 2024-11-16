@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { addDays, isBefore, format } from "date-fns";
+import { addDays, isBefore, format, isAfter } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange, isDateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
-  disablePastDates?: boolean;
+  disableDates?: "past" | "present" | "future" | null;
   className?: string;
   defaultDate?: DateRange;
   onDateChange: (date: DateRange) => void;
 }
 export function DatePickerWithRange({
-  disablePastDates = false,
+  disableDates = null,
   defaultDate,
   onDateChange,
   className,
@@ -36,8 +40,20 @@ export function DatePickerWithRange({
   }, [defaultDate]);
 
   // Handlers
-  const disablePast = (date: Date) => {
-    return disablePastDates ? isBefore(date, new Date()) : false;
+  const disableDate = (date: Date) => {
+    const today = new Date();
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    if (disableDates === "past") return isBefore(date, startOfToday);
+    if (disableDates === "present") {
+      return !(isBefore(date, startOfToday) || isAfter(date, startOfToday));
+    }
+    if (disableDates === "future") return isAfter(date, startOfToday);
+    return false;
   };
 
   const handleDateSelect = (selectedDate: DateRange | undefined) => {
@@ -56,14 +72,15 @@ export function DatePickerWithRange({
             variant={"outline"}
             className={cn(
               "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
               date.to ? (
                 <>
-                  {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")}
+                  {format(date.from, "LLL dd, y")} -{" "}
+                  {format(date.to, "LLL dd, y")}
                 </>
               ) : (
                 format(date.from, "LLL dd, y")
@@ -81,7 +98,7 @@ export function DatePickerWithRange({
             selected={date}
             onSelect={handleDateSelect}
             numberOfMonths={isDesktop ? 2 : 1}
-            disabled={disablePast}
+            disabled={disableDate}
           />
         </PopoverContent>
       </Popover>

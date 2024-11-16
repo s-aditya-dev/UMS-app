@@ -13,15 +13,17 @@ import { cn } from "@/lib/utils";
 
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   disableDates?: "past" | "present" | "future" | null;
+  placeholder?: string | null;
   className?: string;
   defaultDate?: Date;
   onDateChange: (date: Date) => void;
 }
 
-export function DatePicker({
+export function DatePickerV2({
   disableDates = null,
   defaultDate,
   onDateChange,
+  placeholder = null,
   className,
 }: DatePickerProps) {
   // useStates
@@ -63,13 +65,17 @@ export function DatePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "w-[280px] justify-start text-left font-normal",
+            "w-full sm:w-[280px] justify-start text-left font-normal",
             !date && "text-muted-foreground",
             className,
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {date ? (
+            format(date, "PPP")
+          ) : (
+            <span>{placeholder ? placeholder : "Pick a date"}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

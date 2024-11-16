@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validatePattern, validateLength, PatternUsername, PatternPassword } from "@/utils/RegEx";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,16 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
+import { LoginUserSchema } from "@/utils/userSchema";
+import { formatZodErrors } from "@/utils/zodUtils";
 import { ArrowRight } from "lucide-react";
 
-export const description =
-  "A simple login form with email and password. The submit button says 'Sign in'.";
+interface LoginUser {
+  username: string;
+  password: string;
+}
 
 export function LoginForm() {
   // Hooks::-
@@ -28,101 +30,34 @@ export function LoginForm() {
   const navigate = useNavigate();
 
   // useStates:-
-  const [Username, setUsername] = useState("");
-  const [Password, setPassword] = useState("");
+  const [user, setUser] = useState<LoginUser>({
+    username: "",
+    password: "",
+  });
   const [remember, setRemember] = useState<boolean>(false);
 
   // Event Handlers:-
-  const handleUsernameChange = (inputUsername: string) => {
-    if (validateLength(inputUsername, 20)) {
-      toast({
-        title: "Username Too Long",
-        description: "Please keep your username under 20 characters.",
-      });
-    } else if (validatePattern(inputUsername, PatternUsername)) {
-      toast({
-        title: "Invalid Username Characters",
-        description: "Usernames can only contain letters, numbers, underscores, @, and periods.",
-      });
-    } else {
-      setUsername(inputUsername);
-      return true;
-    }
-    return false;
-  };
-
-  const handlePasswordChange = (inputPassword: string) => {
-    if (validateLength(inputPassword, 12)) {
-      toast({
-        title: "Password Too Long",
-        description: "Please keep your password under 12 characters.",
-      });
-    } else if (validatePattern(inputPassword, PatternPassword)) {
-      toast({
-        title: "Invalid Password Characters",
-        description: "Password can only contain letters and numbers.",
-      });
-    } else {
-      setPassword(inputPassword);
-      return true;
-    }
-
-    return false;
+  const handleInputChange = (
+    field: keyof LoginUser,
+    value: string | string[],
+  ) => {
+    setUser({ ...user, [field]: value });
   };
 
   const handleSubmit = () => {
-    // RegExp Patterns
-    const patterns = {
-      username: /^[a-zA-Z0-9_.]*$/,
-      password: /^[a-zA-Z0-9]*$/,
-    };
+    const validation = LoginUserSchema.safeParse(user);
 
-    // Function to generate toast messages
-    const createToast = (
-      title: string,
-      description: string,
-      variant: "default" | "destructive" = "default",
-      actionTitle: string = "",
-      actionOnClick?: () => void
-    ) => {
+    if (!validation.success) {
+      const errorMessages = formatZodErrors(validation.error.errors);
+
       toast({
-        variant,
-        title,
-        description,
-        ...(actionTitle && {
-          action: (
-            <ToastAction altText={actionTitle} onClick={actionOnClick}>
-              {actionTitle}
-            </ToastAction>
-          ),
-        }),
+        title: "Login Error",
+        description: `Please correct the following errors:\n${errorMessages}`,
       });
-    };
-
-    // Username and Password validations
-    if (!Username) {
-      createToast("Invalid Username", "Username cannot be empty.");
       return;
     }
 
-    if (validatePattern(Username, patterns.username)) {
-      createToast(
-        "Invalid Username Characters",
-        "Usernames can only contain letters, numbers, underscores, and periods."
-      );
-      return;
-    }
-
-    if (!Password) {
-      createToast("Invalid Password", "Password cannot be empty.");
-      return;
-    }
-
-    if (validatePattern(Password, patterns.password)) {
-      createToast("Invalid Password Characters", "Password can only contain letters and numbers.");
-      return;
-    }
-
+    //Actual user creation logic goes here
     try {
       console.log("Success");
       navigate("/panel");
@@ -151,9 +86,9 @@ export function LoginForm() {
                 type="username"
                 placeholder="tony.stark@3000"
                 required
-                value={Username}
+                value={user.username}
                 className="text-base"
-                onChange={(e) => handleUsernameChange(e.target.value)}
+                onChange={(e) => handleInputChange("username", e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -163,9 +98,9 @@ export function LoginForm() {
               <PasswordInput
                 id="password"
                 required
-                value={Password}
+                value={user.password}
                 className="text-base"
-                onChange={(e) => handlePasswordChange(e.target.value)}
+                onChange={(e) => handleInputChange("password", e.target.value)}
               />
             </div>
 

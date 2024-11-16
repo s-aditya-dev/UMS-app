@@ -1,4 +1,3 @@
-import { userType } from "@/apps/users";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,25 +11,26 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { z } from "zod";
-import { MultiSelect } from "../custom ui/multi-select";
+import { toProperCase } from "@/utils/strUtils";
 import { formatZodErrors } from "@/utils/zodUtils";
+import { useState } from "react";
+import { InstantUserSchema } from "@/utils/userSchema";
+import { MultiSelect } from "../custom ui/multi-select";
+import {
+  createUser,
+  generatePassword,
+  generateUniqueId,
+  generateUsername,
+} from "./user-func";
+import { userType } from "@/store/slices/userSlice";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
 
 const roles = [
   { label: "Admin", value: "admin" },
   { label: "Users", value: "user" },
   { label: "Manager", value: "manager" },
 ];
-
-const instantUserScheme = z.object({
-  username: z.string(),
-  password: z.string(),
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  roles: z.array(z.string()).min(1),
-  isLocked: z.boolean(),
-});
 
 interface InstantUserFormProps {
   open: boolean;
@@ -42,10 +42,12 @@ export const InstantUserForm = ({
   onOpenChange,
 }: InstantUserFormProps) => {
   // Hooks
+  const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
 
   // use States
-  const [newUser, setNewUser] = useState<Partial<userType>>({
+  const [newUser, setNewUser] = useState<userType>({
+    _id: "",
     username: "",
     password: "",
     firstName: "",
@@ -53,16 +55,6 @@ export const InstantUserForm = ({
     roles: [],
     isLocked: false,
   });
-
-  // util functions
-  const generateUsername = (firstName: string) => {
-    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
-    return `${firstName}${randomDigits}`;
-  };
-
-  const generatePassword = () => {
-    return Math.random().toString(36).slice(-8); // Generates random 8-char password
-  };
 
   // Event Handlers
   const handleInputChange = (
@@ -73,16 +65,22 @@ export const InstantUserForm = ({
   };
 
   const handleCreateUser = () => {
-    const username = generateUsername(newUser.firstName || "");
+    const _id = generateUniqueId();
+    const username = generateUsername(newUser.firstName.toLowerCase() || "");
     const password = generatePassword();
+    const firstName = newUser.firstName ? toProperCase(newUser.firstName) : "";
+    const lastName = newUser.lastName ? toProperCase(newUser.lastName) : "";
 
     const user = {
       ...newUser,
+      _id,
       username,
       password,
+      firstName,
+      lastName,
     };
 
-    const validation = instantUserScheme.safeParse(user);
+    const validation = InstantUserSchema.safeParse(user);
 
     if (!validation.success) {
       const errorMessages = formatZodErrors(validation.error.errors);
@@ -96,8 +94,7 @@ export const InstantUserForm = ({
     }
 
     //Actual user creation logic goes here
-    console.log("User created:", instantUserScheme.safeParse(user));
-
+    createUser(user, dispatch);
     onOpenChange(false);
   };
 
@@ -110,22 +107,40 @@ export const InstantUserForm = ({
         </DialogHeader>
         <div>
           <div className="flex flex-col justify-center items-center gap-4">
-            <FormFieldWrapper LabelText="FirstName" Important className="gap-2">
+            <FormFieldWrapper
+              LabelText="FirstName"
+              LabelFor="firstNameField"
+              Important
+              className="gap-2"
+            >
               <Input
+                id="firstNameField"
                 placeholder="Enter first name"
                 value={newUser.firstName || ""}
                 onChange={(e) => handleInputChange("firstName", e.target.value)}
               />
             </FormFieldWrapper>
-            <FormFieldWrapper LabelText="LastName" Important className="gap-2">
+            <FormFieldWrapper
+              LabelText="LastName"
+              LabelFor="lastNameField"
+              Important
+              className="gap-2"
+            >
               <Input
+                id="lastNameField"
                 placeholder="Enter last name"
                 value={newUser.lastName || ""}
                 onChange={(e) => handleInputChange("lastName", e.target.value)}
               />
             </FormFieldWrapper>
-            <FormFieldWrapper LabelText="Roles" Important className="gap-2">
+            <FormFieldWrapper
+              LabelText="Roles"
+              LabelFor="roleField"
+              Important
+              className="gap-2"
+            >
               <MultiSelect
+                id="roleField"
                 options={roles}
                 defaultValue={newUser?.roles || []}
                 onValueChange={(value) => handleInputChange("roles", value)}

@@ -1,4 +1,3 @@
-import { userType } from "@/apps/users";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -9,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserAction } from "@/components/users/user-actions";
+import { userType } from "@/store/slices/userSlice";
 import { useState } from "react";
 import { Badge } from "../ui/badge";
 
@@ -58,7 +58,9 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                   {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={`success`}>Active</Badge>
+                  <Badge className="cursor-default" variant={`success`}>
+                    Active
+                  </Badge>
                 </TableCell>
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
                 <TableCell>{user.roles[0]}</TableCell>

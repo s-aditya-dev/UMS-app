@@ -15,7 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DatePickerWithRange, DateTimeRangePicker } from "@/components/custom ui/date-time-pickers";
+import {
+  DatePickerWithRange,
+  DateTimeRangePicker,
+} from "@/components/custom ui/date-time-pickers";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -66,7 +69,11 @@ interface TaskFormProps {
   initialData?: TaskFormMetadataType | null;
 }
 
-export const TaskForm = ({ children, initialEvent = null, initialData = null }: TaskFormProps) => {
+export const TaskForm = ({
+  children,
+  initialEvent = null,
+  initialData = null,
+}: TaskFormProps) => {
   //useForm hook
   const { register, handleSubmit, setValue, watch } = useForm<FormFields>({
     defaultValues: {
@@ -97,9 +104,15 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
 
   //Variable Declarations
   const Title = !initialEvent ? "Create Event" : "Update Event";
-  const categoryList = initialData ? initialData.categoryList : ["Exams", "Testing"];
-  const priorityList = initialData ? initialData.priorityList : ["High", "Medium", "Low"];
-  const statusList = initialData ? initialData.statusList : ["Incomplete", "Complete", "Canceled"];
+  const categoryList = initialData
+    ? initialData.categoryList
+    : ["Exams", "Testing"];
+  const priorityList = initialData
+    ? initialData.priorityList
+    : ["High", "Medium", "Low"];
+  const statusList = initialData
+    ? initialData.statusList
+    : ["Incomplete", "Complete", "Canceled"];
 
   // useEffect
   useEffect(() => {
@@ -133,7 +146,11 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
               id="form-container"
               className="w-full my-1 flex flex-col justify-center items-center gap-6 mb-6"
             >
-              <FormFieldWrapper LabelText="Title" LabelFor="titleInput" Important>
+              <FormFieldWrapper
+                LabelText="Title"
+                LabelFor="titleInput"
+                Important
+              >
                 <Input
                   id="titleInput"
                   placeholder="Enter event title"
@@ -153,7 +170,10 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
                   id="selectTiming"
                   className="flex items-center sm:justify-around gap-3 flex-wrap-reverse"
                 >
-                  <div id="checkbox-container" className="flex items-center gap-2 flex-wrap">
+                  <div
+                    id="checkbox-container"
+                    className="flex items-center gap-2 flex-wrap"
+                  >
                     <Checkbox
                       id="rangeEvent"
                       checked={isRangeEvent}
@@ -164,14 +184,14 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
 
                   {isRangeEvent ? (
                     <DatePickerWithRange
-                      disablePastDates
+                      disableDates="past"
                       className="w-full sm:max-w-[300px]"
                       defaultDate={{ from: startDate, to: endDate }}
                       onDateChange={handleSetDate}
                     />
                   ) : (
                     <DateTimeRangePicker
-                      disablePastDates
+                      disableDates={"past"}
                       className="w-full"
                       defaultDate={{ from: startDate, to: endDate }}
                       onDateChange={handleSetDate}
@@ -180,9 +200,15 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
                 </div>
               </FormFieldWrapper>
 
-              <FormFieldWrapper LabelText="Category - Priority - Status" Important>
+              <FormFieldWrapper
+                LabelText="Category - Priority - Status"
+                Important
+              >
                 <div className="w-full flex flex-wrap gap-3">
-                  <Select onValueChange={(value) => setValue("category", value)} value={category}>
+                  <Select
+                    onValueChange={(value) => setValue("category", value)}
+                    value={category}
+                  >
                     <SelectTrigger className=" min-w-[150px] flex-grow">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
@@ -197,7 +223,10 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <Select onValueChange={(value) => setValue("priority", value)} value={priority}>
+                  <Select
+                    onValueChange={(value) => setValue("priority", value)}
+                    value={priority}
+                  >
                     <SelectTrigger className="w-[30%] min-w-[150px] flex-grow">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
@@ -212,7 +241,10 @@ export const TaskForm = ({ children, initialEvent = null, initialData = null }: 
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <Select onValueChange={(value) => setValue("status", value)} value={status}>
+                  <Select
+                    onValueChange={(value) => setValue("status", value)}
+                    value={status}
+                  >
                     <SelectTrigger className="w-[30%] min-w-[150px] flex-grow">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>

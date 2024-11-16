@@ -5,7 +5,7 @@ import { DatePicker } from "./date-picker";
 import { TimePicker, AdjustTime } from "./time-picker";
 
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
-  disablePastDates?: boolean;
+  disableDates?: "past" | "present" | "future" | null;
   className?: string;
   defaultDate?: DateRange;
   onDateChange: (date: DateRange) => void;
@@ -15,7 +15,7 @@ export function DateTimeRangePicker({
   className,
   defaultDate,
   onDateChange,
-  disablePastDates = false,
+  disableDates = null,
 }: DatePickerProps) {
   // useStates
   const [startTime, setStartTime] = useState<string>("00:00");
@@ -58,9 +58,12 @@ export function DateTimeRangePicker({
     // Set the hours for start and end based on the time state
     startCombinedDate.setHours(
       parseInt(startTime.split(":")[0]),
-      parseInt(startTime.split(":")[1])
+      parseInt(startTime.split(":")[1]),
     );
-    endCombinedDate.setHours(parseInt(endTime.split(":")[0]), parseInt(endTime.split(":")[1]));
+    endCombinedDate.setHours(
+      parseInt(endTime.split(":")[0]),
+      parseInt(endTime.split(":")[1]),
+    );
 
     return { from: startCombinedDate, to: endCombinedDate };
   };
@@ -91,7 +94,7 @@ export function DateTimeRangePicker({
   return (
     <div className={cn("flex w-full gap-2 items-center flex-wrap", className)}>
       <DatePicker
-        disablePastDates={disablePastDates}
+        disableDates={disableDates}
         defaultDate={date.from}
         onDateChange={handleDateChange}
         className="w-full md:max-w-[200px] flex-grow"

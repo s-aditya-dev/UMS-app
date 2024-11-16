@@ -23,7 +23,9 @@ export const taskSlice = createSlice({
       state.categories.push(action.payload);
     },
     removeCategory: (state, action: PayloadAction<string>) => {
-      state.categories = state.categories.filter((category) => category !== action.payload);
+      state.categories = state.categories.filter(
+        (category) => category !== action.payload,
+      );
     },
   },
 });
