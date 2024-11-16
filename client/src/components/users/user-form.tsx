@@ -103,7 +103,7 @@ export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="w-[90vw] px-2">
         <DialogHeader>
           <DialogTitle>User registration form</DialogTitle>
         </DialogHeader>
@@ -157,6 +157,7 @@ export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
                   onDateChange={handleDateClick}
                   disableDates={"future"}
                   placeholder={"Select your DOB"}
+                  closeOnDayClick
                 />
               </div>
             </FormFieldWrapper>
@@ -190,13 +191,16 @@ export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
                   }
                 />
               </div>
-              <div className="flex items-baseline sm:items-center gap-3 px-1">
+              <div className="flex items-center gap-3 px-1">
                 <Checkbox
                   id="defaultPass"
                   checked={isDefaultPass}
                   onClick={() => setDefaultPass(!isDefaultPass)}
                 />
-                <Label htmlFor="defaultPass" className="font-semibold">
+                <Label
+                  htmlFor="defaultPass"
+                  className="font-semibold leading-5"
+                >
                   Generate random password, require change on first login
                 </Label>
               </div>

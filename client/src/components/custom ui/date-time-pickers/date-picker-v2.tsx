@@ -13,20 +13,23 @@ import { cn } from "@/lib/utils";
 
 interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   disableDates?: "past" | "present" | "future" | null;
+  closeOnDayClick?: boolean;
   placeholder?: string | null;
   className?: string;
   defaultDate?: Date;
   onDateChange: (date: Date) => void;
 }
 
-export function DatePickerV2({
+export default function DatePickerV2({
   disableDates = null,
+  closeOnDayClick = false,
   defaultDate,
   onDateChange,
   placeholder = null,
   className,
 }: DatePickerProps) {
   // useStates
+  const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<Date>();
 
   // useEffects
@@ -35,7 +38,6 @@ export function DatePickerV2({
   }, [defaultDate]);
 
   // handlers
-
   const disableDate = (date: Date) => {
     const today = new Date();
     const startOfToday = new Date(
@@ -59,8 +61,13 @@ export function DatePickerV2({
     }
   };
 
+  const handleDayClick = () => {
+    if (closeOnDayClick) return setIsOpen(false);
+    return undefined;
+  };
+
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -85,6 +92,11 @@ export function DatePickerV2({
           onSelect={handleDateSelect}
           initialFocus
           disabled={disableDate}
+          captionLayout="dropdown"
+          onDayClick={handleDayClick}
+          fromYear={1950}
+          toYear={new Date().getFullYear()}
+          defaultMonth={date}
         />
       </PopoverContent>
     </Popover>
