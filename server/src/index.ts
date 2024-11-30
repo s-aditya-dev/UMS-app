@@ -3,6 +3,7 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { DB_URI, FRONTEND_URL, PORT } from "./config/dotenv";
+import { authRoute, userRoute } from "./routes";
 
 // Initialize express app
 const app = express();
@@ -51,11 +52,27 @@ app.use(
 app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to the Express server!");
 });
+app.use("/api/auth", authRoute);
+app.use("/api/user", userRoute);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("An error occurred:", err.message);
-  res.status(500).json({ error: "An internal error occurred" });
+  // Log the error for server-side tracking
+  console.error("An error occurred:", err);
+
+  const statusCode = err.status || 500;
+
+  const errorResponse = {
+    error:
+      statusCode === 500
+        ? "An internal server error occurred"
+        : err.message || "An unexpected error occurred",
+    ...(process.env.NODE_ENV === "development" && {
+      details: err.stack,
+    }),
+  };
+
+  res.status(statusCode).json(errorResponse);
 });
 
 // Graceful shutdown
