@@ -28,7 +28,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
     <Card className="w-[90svw] md:w-full">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="hover:bg-card">
             <TableHead>#</TableHead>
             <TableHead className="whitespace-nowrap">Employee Name</TableHead>
             <TableHead>Username</TableHead>
@@ -41,7 +41,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
         </TableHeader>
         <TableBody>
           {userList.length === 0 ? (
-            <TableRow>
+            <TableRow className="hover:bg-card">
               <TableCell colSpan={8} className="text-center">
                 No users found
               </TableCell>

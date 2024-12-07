@@ -1,14 +1,11 @@
 import { AppDispatch, RootState } from "@/store";
-import { addUser, userType } from "@/store/slices/userSlice";
+import {
+  addUser,
+  removeUser,
+  updateUser,
+  userType,
+} from "@/store/slices/userSlice";
 import { useSelector } from "react-redux";
-export const generateUniqueId = () => {
-  const chars = "abcdef0123456789";
-  let id = "";
-  for (let i = 0; i < 24; i++) {
-    id += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return id;
-};
 
 export const generateUsername = (firstName: string) => {
   const randomDigits = Math.floor(1000 + Math.random() * 9000).toString();
@@ -26,4 +23,12 @@ export const getUsers = () => {
 
 export const createUser = (user: userType, dispatch: AppDispatch) => {
   dispatch(addUser(user));
+};
+
+export const editUser = (user: userType, dispatch: AppDispatch) => {
+  dispatch(updateUser(user));
+};
+
+export const deleteUser = (userID: string, dispatch: AppDispatch) => {
+  dispatch(removeUser(userID));
 };

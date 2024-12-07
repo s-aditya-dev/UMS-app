@@ -1,4 +1,5 @@
 import { UserFooter } from "@/components/users/user-footer";
+import { getUsers } from "@/components/users/user-func";
 import { UserHeader } from "@/components/users/user-header";
 import { UserTable } from "@/components/users/user-table";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
@@ -6,7 +7,6 @@ import { usePagination } from "@/hooks/use-pagination";
 import { search } from "@/utils/searchUtils";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getUsers } from "@/components/users/user-func";
 
 export const UserList = () => {
   // Redux Selector

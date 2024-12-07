@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Tooltip } from "../custom ui/tooltip-provider";
-import { Button } from "../ui/button";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +9,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { UserForm } from "./user-form";
+} from "@/components/ui/dropdown-menu";
 import { InstantUserForm } from "./instant-user-form";
+import { UserForm } from "./user-form";
 
 export const UserAddButton = () => {
   const [isUserFormOpen, setUserFormOpen] = useState(false);
@@ -39,7 +39,7 @@ export const UserAddButton = () => {
             </Tooltip>
           </span>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="mx-3">
           <DropdownMenuLabel>Add Users</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleInstantUserFormOpen}>

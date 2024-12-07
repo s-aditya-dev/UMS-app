@@ -1,12 +1,5 @@
-import { Link } from "react-router-dom";
-import { Fragment } from "react";
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { ModeToggle } from "@/components/custom ui/mode-toggle";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronRight } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,18 +17,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
+import * as React from "react";
+import { Fragment } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface NavProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
   logoutFunc: () => void;
 }
 
-const Nav: React.FC<NavProps> = ({ currContent, logoutFunc, className, ...props }) => {
+const Nav: React.FC<NavProps> = ({
+  currContent,
+  logoutFunc,
+  className,
+  ...props
+}) => {
+  // hooks
+  const navigate = useNavigate();
+  const handleSettings = () => {
+    navigate("/panel/settings");
+  };
+  const handleSupport = () => {
+    console.log("contacted Support");
+  };
+
   return (
     <nav
       className={cn(
         "bg-card border-b-2 h-full w-full py-4 px-6 flex items-center justify-between",
-        className
+        className,
       )}
       {...props}
     >
@@ -42,12 +56,18 @@ const Nav: React.FC<NavProps> = ({ currContent, logoutFunc, className, ...props 
         <Breadcrumbs />
       </div>
 
-      <h1 className="md:hidden text-lg font-semibold md:text-2xl">{currContent}</h1>
+      <h1 className="md:hidden text-lg font-semibold md:text-2xl">
+        {currContent}
+      </h1>
       <div className="flex items-center justify-center gap-4">
         <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
+            <Button
+              variant="outline"
+              size="icon"
+              className="overflow-hidden rounded-full"
+            >
               <Avatar>
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
@@ -56,10 +76,24 @@ const Nav: React.FC<NavProps> = ({ currContent, logoutFunc, className, ...props 
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                handleSettings();
+              }}
+            >
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                handleSupport();
+              }}
+            >
+              Support
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logoutFunc()}>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => logoutFunc()}>
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -80,7 +114,9 @@ export const Breadcrumbs = () => {
                   <Link to={item.to}>{item.label}</Link>
                 </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage className="font-semibold">{item.label}</BreadcrumbPage>
+                <BreadcrumbPage className="font-semibold">
+                  {item.label}
+                </BreadcrumbPage>
               )}
             </BreadcrumbItem>
             {index < BreadcrumbItems.length - 1 && (

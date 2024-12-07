@@ -15,9 +15,9 @@ import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/hooks/use-toast";
-import { LoginUserSchema } from "@/utils/userSchema";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { ArrowRight } from "lucide-react";
+import { LoginUserSchema } from "@/utils/zod schemas/userSchema";
 
 interface LoginUser {
   username: string;
@@ -44,6 +44,15 @@ export function LoginForm() {
     setUser({ ...user, [field]: value });
   };
 
+  const handleLogin = (user: LoginUser) => {
+    try {
+      console.log("Success:", user);
+      navigate("/panel");
+    } catch {
+      console.log("Error");
+    }
+  };
+
   const handleSubmit = () => {
     const validation = LoginUserSchema.safeParse(user);
 
@@ -57,13 +66,7 @@ export function LoginForm() {
       return;
     }
 
-    //Actual user creation logic goes here
-    try {
-      console.log("Success");
-      navigate("/panel");
-    } catch {
-      console.log("Error");
-    }
+    handleLogin(user);
   };
 
   return (
