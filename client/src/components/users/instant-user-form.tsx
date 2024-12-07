@@ -11,20 +11,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { toProperCase } from "@/utils/strUtils";
+import { AppDispatch } from "@/store";
+import { userType } from "@/store/slices/userSlice";
+import { toProperCase } from "@/utils/func/strUtils";
+import { InstantUserSchema } from "@/utils/zod schemas/userSchema";
+import { generateUniqueId } from "@/utils/func/uniqueId";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { useState } from "react";
-import { InstantUserSchema } from "@/utils/userSchema";
-import { MultiSelect } from "../custom ui/multi-select";
-import {
-  createUser,
-  generatePassword,
-  generateUniqueId,
-  generateUsername,
-} from "./user-func";
-import { userType } from "@/store/slices/userSlice";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store";
+import { MultiSelect } from "../custom ui/multi-select";
+import { createUser, generatePassword, generateUsername } from "./user-func";
 
 const roles = [
   { label: "Admin", value: "admin" },
@@ -82,6 +78,7 @@ export const InstantUserForm = ({
 
     const validation = InstantUserSchema.safeParse(user);
 
+    console.log(validation);
     if (!validation.success) {
       const errorMessages = formatZodErrors(validation.error.errors);
 

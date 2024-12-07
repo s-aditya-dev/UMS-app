@@ -3,7 +3,7 @@ import { Calendar } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { EventType } from "@/components/calendar/calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 import { setEventColor } from "@/components/calendar/calendarFunc";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
@@ -20,7 +20,9 @@ interface EventListProps extends React.HTMLAttributes<HTMLElement> {
 const upcomingEvents = (Events: EventType[]) => {
   const today = new Date();
 
-  return Events.filter((event) => event.start >= today && event.status === "Incomplete")
+  return Events.filter(
+    (event) => event.start >= today && event.status === "Incomplete",
+  )
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, 3);
 };
@@ -66,7 +68,9 @@ export const EventList: React.FC<EventListProps> = ({
 const eventBody = (event: EventType) => (
   <TaskDetails Event={event}>
     <div className="p-4 py-2 flex gap-4 items-baseline rounded-md hover:bg-muted">
-      <div className={`h-2 w-2 rounded-full col-span-1 ${setEventColor(event)}`}></div>
+      <div
+        className={`h-2 w-2 rounded-full col-span-1 ${setEventColor(event)}`}
+      ></div>
       <div>
         <div className="font-semibold text-foreground/60 text-sm">
           {`${formattedDate(event.start, event.end)}`}
@@ -84,8 +88,8 @@ const formattedDate = (start: Date, end: Date) => {
   const eventDate = eventStart.isSame(moment(), "day")
     ? "Today"
     : eventStart.isSame(moment().add(1, "day"), "day")
-    ? "Tomorrow"
-    : eventStart.format("Do MMM");
+      ? "Tomorrow"
+      : eventStart.format("Do MMM");
 
   const eventTime = eventStart.isSame(eventEnd, "day")
     ? `${eventStart.format("hh:mm A")} - ${eventEnd.format("hh:mm A")}`

@@ -1,15 +1,38 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { events } from "../data/events";
 
-interface TaskState {
+export type EventType = {
+  id: string;
+  title: string;
+  description: string;
+  start: Date;
+  end: Date;
+  month_year: string;
+  assignedBy: string;
+  category: string;
+  priority: string;
+  status: string;
+  participants: string[];
+};
+
+interface TaskMetaData {
   categories: string[];
   priorityList: string[];
   statusList: string[];
 }
 
+interface TaskState {
+  TaskInitialData: TaskMetaData;
+  Events: EventType[];
+}
+
 const initialState: TaskState = {
-  categories: [],
-  priorityList: ["High", "Medium", "Low"],
-  statusList: ["Incomplete", "Complete"],
+  TaskInitialData: {
+    categories: ["Exams", "Testing"],
+    priorityList: ["High", "Medium", "Low"],
+    statusList: ["Incomplete", "Complete"],
+  },
+  Events: events,
 };
 
 export const taskSlice = createSlice({
@@ -17,21 +40,49 @@ export const taskSlice = createSlice({
   initialState,
   reducers: {
     setCategories: (state, action: PayloadAction<string[]>) => {
-      state.categories = action.payload;
+      state.TaskInitialData.categories = action.payload;
     },
     addCategory: (state, action: PayloadAction<string>) => {
-      state.categories.push(action.payload);
+      state.TaskInitialData.categories.push(action.payload);
     },
     removeCategory: (state, action: PayloadAction<string>) => {
-      state.categories = state.categories.filter(
-        (category) => category !== action.payload,
+      state.TaskInitialData.categories =
+        state.TaskInitialData.categories.filter(
+          (category) => category !== action.payload,
+        );
+    },
+    setEvents: (state, action: PayloadAction<EventType[]>) => {
+      state.Events = action.payload;
+    },
+    addEvent: (state, action: PayloadAction<EventType>) => {
+      state.Events.push(action.payload);
+    },
+    updateEvent: (state, action: PayloadAction<EventType>) => {
+      const index = state.Events.findIndex(
+        (event) => event.id === action.payload.id,
+      );
+      if (index !== -1) {
+        state.Events[index] = action.payload;
+      }
+    },
+    removeEvent: (state, action: PayloadAction<string>) => {
+      state.Events = state.Events.filter(
+        (event) => event.id !== action.payload,
       );
     },
   },
 });
 
 // Export actions
-export const { setCategories, addCategory, removeCategory } = taskSlice.actions;
+export const {
+  setCategories,
+  addCategory,
+  removeCategory,
+  setEvents,
+  addEvent,
+  updateEvent,
+  removeEvent,
+} = taskSlice.actions;
 
 // Export reducer
 export default taskSlice.reducer;

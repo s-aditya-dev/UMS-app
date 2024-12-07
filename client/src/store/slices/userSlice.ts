@@ -13,6 +13,10 @@ export interface userType {
   phone?: string;
   isLocked: boolean;
   permissions?: object;
+  settings?: {
+    isRegistered?: boolean;
+    isPassChange: boolean;
+  };
 }
 
 const initialState: userType[] = userList;

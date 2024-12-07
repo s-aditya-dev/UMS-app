@@ -7,14 +7,16 @@ import {
   Views,
 } from "react-big-calendar";
 import moment from "moment";
-import { EventType, setEventColor } from "./calendarFunc";
+import { setEventColor } from "./calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 import { TaskDetails } from "../task/task-detail";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 
 const localizer = momentLocalizer(moment);
 type Keys = keyof typeof Views;
 
-interface CustomCalendarProps extends Omit<CalendarProps<EventType>, "localizer" | "components"> {
+interface CustomCalendarProps
+  extends Omit<CalendarProps<EventType>, "localizer" | "components"> {
   events?: EventType[];
   view?: (typeof Views)[Keys];
   onView?: (view: string) => void;
@@ -37,7 +39,11 @@ export function Calendar({
         month: {
           event: CustomEventComponent,
           dateHeader: (headerProps) => (
-            <CustomDateHeader {...headerProps} setView={onView} setDate={onNavigate} />
+            <CustomDateHeader
+              {...headerProps}
+              setView={onView}
+              setDate={onNavigate}
+            />
           ),
         },
         week: { event: CustomEventComponent, header: CustomDateHeader },
@@ -70,7 +76,7 @@ const CustomEventComponent = ({ event }: EventProps<EventType>) => {
         <Tooltip content={tooltipContent}>
           <div
             className={`${setEventColor(
-              event
+              event,
             )} h-full flex items-center text-center rounded-sm py-0.5 px-2 font-semibold text-sm text-white`}
           >
             {title}

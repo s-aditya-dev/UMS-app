@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import styles from "@/scss/layout/TaskLayout.module.scss";
 import { EventList } from "@/components/task/event-list";
-import { events as initialEvent } from "@/components/calendar/events";
+import { events as initialEvent } from "@/store/data/events";
 import { CategoriesFilter } from "@/components/task/categories";
 import { ShadcnCal } from "@/components/calendar/Shadcn Calender";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import { EventType } from "@/components/calendar/calendarFunc";
+import "react-big-calendar/lib/css/react-big-calendar.css"; //CSS import for styling calendar
+import { EventType } from "@/store/slices/taskSlice";
 import {
   getUniqueCategories,
   filterCategoryFunc,
@@ -48,11 +48,18 @@ export const Task = () => {
       <CategoriesFilter
         categorieList={categories}
         filterFunc={(selectedCategories) =>
-          filterCategoryFunc(events, selectedCategories, setFilteredEvents, filteredEvents)
+          filterCategoryFunc(
+            events,
+            selectedCategories,
+            setFilteredEvents,
+            filteredEvents,
+          )
         }
         editCategoryAccess={taskPerms.editCategoryAccess}
         saveFunc={(Category) => saveCategoryFunc(Category, setTaskCategories)}
-        deleteFunc={(Category) => deleteCategoryFunc(Category, categories, setTaskCategories)}
+        deleteFunc={(Category) =>
+          deleteCategoryFunc(Category, categories, setTaskCategories)
+        }
         className={styles.TaskCategory}
       />
       <ShadcnCal events={filteredEvents} className={styles.TaskCalendar} />

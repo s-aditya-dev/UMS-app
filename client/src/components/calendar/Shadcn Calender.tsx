@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useState, useCallback, useMemo } from "react";
 import { Calendar } from "./calendar";
 import { MiniCalendar } from "./mini-calendar";
-import { EventType } from "./calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 import { Views } from "react-big-calendar";
 
 type Keys = keyof typeof Views;
@@ -109,8 +109,9 @@ export const ShadcnCal: React.FC<ShadcnCalProps> = ({
         </div>
 
         <CardTitle
-          className={` ${!isDifferentYear ? "whitespace-nowrap" : "text-center"
-            } font-bold text-[clamp(1.2rem,2vw,1.5rem)]`}
+          className={` ${
+            !isDifferentYear ? "whitespace-nowrap" : "text-center"
+          } font-bold text-[clamp(1.2rem,2vw,1.5rem)]`}
         >
           {dateText}
         </CardTitle>
@@ -126,8 +127,9 @@ export const ShadcnCal: React.FC<ShadcnCalProps> = ({
       </CardHeader>
 
       <CardContent
-        className={`hidden md:block w-full  md:h-[85vh] ${view == "month" ? "xl:h-full" : "xl:h-[85%]"
-          }`}
+        className={`hidden md:block w-full  md:h-[85vh] ${
+          view == "month" ? "xl:h-full" : "xl:h-[85%]"
+        }`}
       >
         <Calendar
           events={events} //custom event is passed directly onthe Calendar component
@@ -137,8 +139,8 @@ export const ShadcnCal: React.FC<ShadcnCalProps> = ({
           onNavigate={setDate}
           toolbar={false}
           date={date}
-        // min={moment("2024-08-10T09:00:00").toDate()}
-        // max={moment("2024-08-10T23:00:00").toDate()}
+          // min={moment("2024-08-10T09:00:00").toDate()}
+          // max={moment("2024-08-10T23:00:00").toDate()}
         />
       </CardContent>
       <CardContent className={`px-2 md:hidden w-full`}>

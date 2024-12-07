@@ -1,25 +1,23 @@
-import { useState, ReactNode, useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { EventType } from "../calendar/calendarFunc";
+import {
+  DatePickerWithRange,
+  DateTimeRangePicker,
+} from "@/components/custom ui/date-time-pickers";
+import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
+import { MultiSelect } from "@/components/custom ui/multi-select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DatePickerWithRange,
-  DateTimeRangePicker,
-} from "@/components/custom ui/date-time-pickers";
-import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -29,10 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MultiSelect } from "@/components/custom ui/multi-select";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { generateUniqueId } from "@/utils/func/uniqueId";
+import { ReactNode, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
-import moment from "moment";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { EventType } from "../calendar/calendarFunc";
 
 const usersList = [
   { value: "Alice Johnson", label: "Alice Johnson" },
@@ -49,20 +49,6 @@ export type TaskFormMetadataType = {
   statusList: string[];
 };
 
-type FormFields = {
-  id: string | null;
-  title: string;
-  description: string;
-  start: Date;
-  end: Date;
-  month_year: string;
-  assignedBy: string;
-  category: string;
-  priority: string;
-  status: string;
-  participants: string[];
-};
-
 interface TaskFormProps {
   children: ReactNode;
   initialEvent?: EventType | null;
@@ -75,19 +61,25 @@ export const TaskForm = ({
   initialData = null,
 }: TaskFormProps) => {
   //useForm hook
-  const { register, handleSubmit, setValue, watch } = useForm<FormFields>({
+  const defaultEvent: EventType = {
+    id: generateUniqueId(),
+    title: "",
+    description: "",
+    start: new Date(),
+    end: new Date(),
+    month_year: "",
+    assignedBy: "",
+    category: "",
+    priority: "",
+    status: "",
+    participants: [],
+  };
+
+  const { register, handleSubmit, setValue, watch } = useForm<EventType>({
     defaultValues: {
-      id: initialEvent?.id || null,
-      title: initialEvent?.title || "",
-      description: initialEvent?.description || "",
-      start: initialEvent?.start || new Date(),
-      end: initialEvent?.end || new Date(),
-      month_year: initialEvent?.month_year || "",
-      assignedBy: initialEvent?.assignedBy || "",
-      category: initialEvent?.category || "",
-      priority: initialEvent?.priority || "",
-      status: initialEvent?.status || "",
-      participants: initialEvent?.participants || [],
+      ...defaultEvent,
+      ...initialEvent,
+      id: initialEvent?.id || generateUniqueId(), // Ensure a unique ID is always generated.
     },
   });
 
@@ -115,13 +107,12 @@ export const TaskForm = ({
     : ["Incomplete", "Complete", "Canceled"];
 
   // useEffect
-  useEffect(() => {
-    if (!moment(startDate).isSame(endDate, "day")) setIsRangeEvent(true);
-  }, [startDate, endDate]);
-
   // Event Handlers
-  const onSave: SubmitHandler<FormFields> = (data) => {
-    console.log("Form Submitted Data:", data);
+  const handleSetRangeEvent = () => {
+    if (isRangeEvent) {
+      setValue("end", startDate);
+    }
+    setIsRangeEvent(!isRangeEvent);
   };
 
   const handleSetDate = (date: DateRange) => {
@@ -130,6 +121,10 @@ export const TaskForm = ({
       setValue("end", date.to);
       setValue("month_year", (startDate.getMonth() + 1).toString());
     }
+  };
+
+  const onSave: SubmitHandler<EventType> = (data) => {
+    console.log("Form Submitted Data:", data);
   };
 
   return (
@@ -177,7 +172,7 @@ export const TaskForm = ({
                     <Checkbox
                       id="rangeEvent"
                       checked={isRangeEvent}
-                      onCheckedChange={() => setIsRangeEvent(!isRangeEvent)}
+                      onCheckedChange={handleSetRangeEvent}
                     />
                     <Label htmlFor="rangeEvent">Range Event</Label>
                   </div>

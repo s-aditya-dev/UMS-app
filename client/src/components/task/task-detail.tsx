@@ -1,4 +1,4 @@
-import { EventType } from "@/components/calendar/calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Button } from "@/components/ui/button";
 import {

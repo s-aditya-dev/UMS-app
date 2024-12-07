@@ -1,8 +1,9 @@
 import { useToast } from "@/hooks/use-toast";
 import { AppDispatch } from "@/store";
 import { userType } from "@/store/slices/userSlice";
-import { toProperCase } from "@/utils/strUtils";
-import { FullUserSchema } from "@/utils/userSchema";
+import { toProperCase } from "@/utils/func/strUtils";
+import { generateUniqueId } from "@/utils/func/uniqueId";
+import { FullUserSchema } from "@/utils/zod schemas/userSchema";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useState } from "react";
@@ -22,11 +23,12 @@ import {
 import { Input, PasswordInput } from "../ui/input";
 import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
-import { createUser, generatePassword, generateUniqueId } from "./user-func";
+import { createUser, generatePassword } from "./user-func";
 
 interface UserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialValue?: userType | null;
 }
 
 const roles = [
@@ -35,24 +37,30 @@ const roles = [
   { label: "Manager", value: "manager" },
 ];
 
-export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
+export const UserForm = ({
+  open,
+  onOpenChange,
+  initialValue = null,
+}: UserFormProps) => {
   // Hooks
   const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
 
   // use States
-  const [newUser, setNewUser] = useState<userType>({
-    _id: "",
-    username: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    email: "",
-    dob: undefined,
-    roles: [],
-    isLocked: false,
-  });
+  const [newUser, setNewUser] = useState<userType>(
+    initialValue ?? {
+      _id: "",
+      username: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
+      dob: undefined,
+      roles: [],
+      isLocked: false,
+    },
+  );
 
   const [isDefaultPass, setDefaultPass] = useState(false);
 
@@ -149,6 +157,7 @@ export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
               />
               <div className="flex flex-wrap sm:flex-nowrap gap-2">
                 <Input
+                  inputMode="numeric"
                   placeholder="Enter phone number"
                   value={newUser.phone || ""}
                   onChange={(e) => handleInputChange("phone", e.target.value)}

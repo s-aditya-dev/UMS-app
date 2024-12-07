@@ -1,4 +1,4 @@
-import { EventType } from "@/components/calendar/calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 
 //-----Categroy related functions-----
 // Get unique categories from the events
@@ -9,7 +9,7 @@ export const getUniqueCategories = (events: EventType[]): string[] => {
 // Save categories
 export const saveCategoryFunc = (
   Category: string[],
-  setCategories: React.Dispatch<React.SetStateAction<string[]>>
+  setCategories: React.Dispatch<React.SetStateAction<string[]>>,
 ) => {
   setCategories(Category);
 };
@@ -18,7 +18,7 @@ export const saveCategoryFunc = (
 export const deleteCategoryFunc = (
   Category: string,
   categories: string[],
-  setCategories: React.Dispatch<React.SetStateAction<string[]>>
+  setCategories: React.Dispatch<React.SetStateAction<string[]>>,
 ) => {
   const updatedCategories = categories.filter((cat) => cat !== Category);
   setCategories(updatedCategories);
@@ -29,7 +29,7 @@ export const filterCategoryFunc = (
   events: EventType[],
   selectedCategories: string[],
   setFilteredEvents: React.Dispatch<React.SetStateAction<EventType[]>>,
-  filteredEvents: EventType[]
+  filteredEvents: EventType[],
 ) => {
   if (!selectedCategories.length) {
     if (filteredEvents.length !== events.length) {
@@ -38,7 +38,9 @@ export const filterCategoryFunc = (
     return;
   }
 
-  const filtered = events.filter((event) => selectedCategories.includes(event.category));
+  const filtered = events.filter((event) =>
+    selectedCategories.includes(event.category),
+  );
 
   if (filtered.length !== filteredEvents.length) {
     setFilteredEvents(filtered);
@@ -49,7 +51,7 @@ export const filterPriorityFunc = (
   events: EventType[],
   selectedPriorities: string[],
   setFilteredEvents: React.Dispatch<React.SetStateAction<EventType[]>>,
-  filteredEvents: EventType[]
+  filteredEvents: EventType[],
 ) => {
   if (!selectedPriorities.length) {
     if (filteredEvents.length !== events.length) {
@@ -58,7 +60,9 @@ export const filterPriorityFunc = (
     return;
   }
 
-  const filtered = events.filter((event) => selectedPriorities.includes(event.priority));
+  const filtered = events.filter((event) =>
+    selectedPriorities.includes(event.priority),
+  );
 
   if (filtered.length !== filteredEvents.length) {
     setFilteredEvents(filtered);
@@ -69,7 +73,7 @@ export const filterStatusFunc = (
   events: EventType[],
   selectedStatus: string[],
   setFilteredEvents: React.Dispatch<React.SetStateAction<EventType[]>>,
-  filteredEvents: EventType[]
+  filteredEvents: EventType[],
 ) => {
   if (!selectedStatus.length) {
     if (filteredEvents.length !== events.length) {
@@ -78,7 +82,9 @@ export const filterStatusFunc = (
     return;
   }
 
-  const filtered = events.filter((event) => selectedStatus.includes(event.status));
+  const filtered = events.filter((event) =>
+    selectedStatus.includes(event.status),
+  );
 
   if (filtered.length !== filteredEvents.length) {
     setFilteredEvents(filtered);

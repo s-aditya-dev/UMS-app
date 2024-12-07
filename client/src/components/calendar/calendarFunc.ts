@@ -1,18 +1,5 @@
 import moment from "moment";
-
-export type EventType = {
-  id: string;
-  title: string;
-  description: string;
-  start: Date;
-  end: Date;
-  month_year: string;
-  assignedBy: string;
-  category: string;
-  priority: string;
-  status: string;
-  participants: string[];
-};
+import { EventType } from "@/store/slices/taskSlice";
 
 export function setEventColor(event: EventType) {
   if (event.status == "Canceled") return "bg-red-800 line-through decoration-2";
@@ -31,7 +18,10 @@ export function handleEventClick(id: string) {
   console.log(id);
 }
 
-export const getEventsForDate = (date: Date, events: EventType[]): EventType[] => {
+export const getEventsForDate = (
+  date: Date,
+  events: EventType[],
+): EventType[] => {
   const targetDate = moment(date).startOf("day");
 
   return events.filter((event) => {
@@ -49,7 +39,7 @@ export const getEventsForDate = (date: Date, events: EventType[]): EventType[] =
 export const getEventsByRange = (
   date: Date,
   events: EventType[],
-  view: string
+  view: string,
 ): { [key: string]: EventType[] } => {
   let startOfPeriod: moment.Moment;
   let endOfPeriod: moment.Moment;

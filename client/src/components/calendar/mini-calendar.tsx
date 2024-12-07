@@ -1,6 +1,11 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { getEventsByRange, setEventColor, handleEventClick, EventType } from "./calendarFunc"; // Ensure EventType is properly imported
+import {
+  getEventsByRange,
+  setEventColor,
+  handleEventClick,
+} from "./calendarFunc";
+import { EventType } from "@/store/slices/taskSlice";
 import moment from "moment";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskDetails } from "../task/task-detail";
@@ -19,18 +24,28 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   ...props
 }) => {
   const eventsByDate = getEventsByRange(date, events, view);
-  const hasEvents = Object.values(eventsByDate).some((eventArray) => eventArray.length > 0);
+  const hasEvents = Object.values(eventsByDate).some(
+    (eventArray) => eventArray.length > 0,
+  );
 
   return (
-    <div className={cn("border rounded-lg overflow-hidden", className)} {...props}>
+    <div
+      className={cn("border rounded-lg overflow-hidden", className)}
+      {...props}
+    >
       <ScrollArea className="h-[450px]">
         {hasEvents ? (
           <table className="w-full">
             <tbody>
               {Object.keys(eventsByDate).map((day, index) =>
                 eventsByDate[day].length > 0 ? (
-                  <EventLayout key={index} events={eventsByDate[day]} view={view} date={day} />
-                ) : null
+                  <EventLayout
+                    key={index}
+                    events={eventsByDate[day]}
+                    view={view}
+                    date={day}
+                  />
+                ) : null,
               )}
             </tbody>
           </table>
@@ -82,13 +97,15 @@ const EventLayout = ({
             <td className="px-4 py-2 text-center">
               {moment(event.start).isSame(event.end, "day")
                 ? `${moment(event.start.toISOString()).format("h:mm A")}-${moment(
-                    event.end.toISOString()
+                    event.end.toISOString(),
                   ).format("h:mm A")}`
                 : "All Day"}
             </td>
             <td className="px-4 py-2">
               <span className="flex items-center gap-3">
-                <div className={`shrink-0 h-2 w-2 rounded-full ${setEventColor(event)}`}></div>
+                <div
+                  className={`shrink-0 h-2 w-2 rounded-full ${setEventColor(event)}`}
+                ></div>
                 <div>{event.title}</div>
               </span>
             </td>
