@@ -1,4 +1,4 @@
-class AppError extends Error {
+/* class AppError extends Error {
   status: number;
 
   constructor(status: number, message: string) {
@@ -14,6 +14,19 @@ const createError = (
   message: string = "An unknown error occurred!!!",
 ): AppError => {
   return new AppError(status, message);
+};
+
+export default createError; */
+
+// utils/createError.ts
+interface CustomError extends Error {
+  status?: number;
+}
+
+const createError = (status: number, message: string): CustomError => {
+  const error = new Error(message) as CustomError;
+  error.status = status;
+  return error;
 };
 
 export default createError;

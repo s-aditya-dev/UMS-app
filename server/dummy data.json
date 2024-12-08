@@ -1,0 +1,13 @@
+{
+  "username": "johndoe",
+  "password": "StrongPassword123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "roles": [
+    "admin",
+    "user"
+  ],
+  "email": "johndoe@example.com",
+  "phone": "+1234567890",
+  "dob": "1990-01-01"
+}

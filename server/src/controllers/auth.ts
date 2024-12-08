@@ -2,15 +2,15 @@ import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/dotenv";
-import User from "../models/user.model";
+import User, { UserAccount } from "../models/user";
 import createError from "../utils/createError";
 
 // Helper function to create a JWT token
-const createToken = (user: any): string => {
+const createToken = (user: UserAccount): string => {
   return jwt.sign(
     {
       username: user.username,
-      role: user.role,
+      role: user.roles,
     },
     JWT_SECRET,
     { expiresIn: "5h" },
@@ -36,7 +36,7 @@ export const login = async (
 
     // Create JWT token
     let token = null;
-    if (user.username && user.role) token = createToken(user);
+    if (user.username && user.roles) token = createToken(user);
     if (!token) return next(createError(400, "Invalid user datatype"));
     // Send response with token as httpOnly cookie
     const { password: _, ...userInfo } = user.toObject(); // Exclude password from response
