@@ -17,9 +17,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Flag, Plus, SquarePen, Trash2 } from "lucide-react";
 import React, { ReactNode, useEffect, useState } from "react";
-import { DialogWithIcon } from "../custom ui/alertDialog";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
+import { DialogWithIcon } from "@/components/custom ui/alertDialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CategoriesFilterProps extends React.HTMLAttributes<HTMLElement> {
   categorieList: string[];

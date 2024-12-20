@@ -8,21 +8,21 @@ import { formatZodErrors } from "@/utils/zodUtils";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { DatePickerV2 } from "../custom ui/date-time-pickers";
-import { FormFieldWrapper } from "../custom ui/form-field-wrapper";
-import { MultiSelect } from "../custom ui/multi-select";
-import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
+import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
+import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
+import { MultiSelect } from "@/components/custom ui/multi-select";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { Input, PasswordInput } from "../ui/input";
-import { Label } from "../ui/label";
-import { ScrollArea } from "../ui/scroll-area";
+} from "@/components/ui/dialog";
+import { Input, PasswordInput } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { createUser, generatePassword } from "./user-func";
 
 interface UserFormProps {

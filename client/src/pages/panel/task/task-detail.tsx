@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import moment from "moment";
 import React, { ReactNode } from "react";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { TaskForm } from "./task-form";
 
 interface TaskDetailsProps {

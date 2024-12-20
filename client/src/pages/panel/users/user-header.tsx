@@ -1,5 +1,5 @@
-import { PaginationControls } from "../custom ui/pagination-controls";
-import { Input } from "../ui/input";
+import { PaginationControls } from "@/components/custom ui/pagination-controls";
+import { Input } from "@/components/ui/input";
 import { UserAddButton } from "./user-add-button";
 import { UserFilterButton } from "./user-filter-button";
 

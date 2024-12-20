@@ -1,7 +1,3 @@
-import { Dashboard } from "@/apps/dashboard";
-import { Task } from "@/apps/task";
-import { UserDetails } from "@/apps/user-details";
-import { UserList } from "@/apps/users";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { cn } from "@/lib/utils";
@@ -9,6 +5,12 @@ import { ProtectedRoute } from "@/utils/Protected Route";
 import * as React from "react";
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+
+//Pages
+import { Dashboard } from "@/pages/panel/dashboard";
+import { Task } from "@/pages/panel/task";
+import { UserDetails } from "@/pages/panel/user-details";
+import { UserList } from "@/pages/panel/users";
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;

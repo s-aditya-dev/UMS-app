@@ -9,7 +9,7 @@ import {
 import moment from "moment";
 import { setEventColor } from "./calendarFunc";
 import { EventType } from "@/store/slices/taskSlice";
-import { TaskDetails } from "../task/task-detail";
+import { TaskDetails } from "@/pages/panel/task/task-detail";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 
 const localizer = momentLocalizer(moment);

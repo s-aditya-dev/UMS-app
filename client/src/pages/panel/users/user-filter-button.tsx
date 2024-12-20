@@ -1,6 +1,6 @@
 import { ListFilter } from "lucide-react";
-import { Tooltip } from "../custom ui/tooltip-provider";
-import { Button } from "../ui/button";
+import { Tooltip } from "@/components/custom ui/tooltip-provider";
+import { Button } from "@/components/ui/button";
 
 export const UserFilterButton = () => {
   return (

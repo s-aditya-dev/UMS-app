@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { ArrowRight } from "lucide-react";
-import { LoginUserSchema } from "@/utils/zod schemas/userSchema";
+import { LoginUserSchema } from "@/../../shared/zod-schema/user";
 
 interface LoginUser {
   username: string;

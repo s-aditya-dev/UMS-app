@@ -7,10 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UserAction } from "@/components/users/user-actions";
+import { UserAction } from "@/pages/panel/users/user-actions";
 import { userType } from "@/store/slices/userSlice";
 import { useState } from "react";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 interface UserTableProps {
   userList: userType[];

@@ -3,13 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 import "./scss/global.scss";
 
-import { Home } from "./pages/home/home";
-import { LoginForm } from "./pages/auth/login";
-import { Panel } from "./pages/panel/panel";
-import { ChangePass } from "./pages/auth/changePass";
-import { RegisterForm } from "./pages/auth/register";
-
-// Initialize QueryClient
+import { Auth, LoginForm } from "./pages/auth/";
+import { Panel } from "./pages/panel/";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -22,20 +17,8 @@ const App = () => {
           element: <LoginForm />,
         },
         {
-          path: "/home",
-          element: <Home />,
-        },
-        {
-          path: "/login",
-          element: <LoginForm />,
-        },
-        {
-          path: "/change-password/:sessionId",
-          element: <ChangePass />,
-        },
-        {
-          path: "/register-user/:sessionId",
-          element: <RegisterForm />,
+          path: "/auth/*",
+          element: <Auth />,
         },
         {
           path: "/panel/*",

@@ -19,7 +19,7 @@ import { generateUniqueId } from "@/utils/func/uniqueId";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { MultiSelect } from "../custom ui/multi-select";
+import { MultiSelect } from "@/components/custom ui/multi-select";
 import { createUser, generatePassword, generateUsername } from "./user-func";
 
 const roles = [

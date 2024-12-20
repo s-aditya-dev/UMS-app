@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import styles from "@/scss/layout/TaskLayout.module.scss";
-import { EventList } from "@/components/task/event-list";
+import { EventList } from "@/pages/panel/task/event-list";
 import { events as initialEvent } from "@/store/data/events";
-import { CategoriesFilter } from "@/components/task/categories";
+import { CategoriesFilter } from "@/pages/panel/task/categories";
 import { ShadcnCal } from "@/components/calendar/Shadcn Calender";
 import "react-big-calendar/lib/css/react-big-calendar.css"; //CSS import for styling calendar
 import { EventType } from "@/store/slices/taskSlice";
@@ -11,7 +11,7 @@ import {
   filterCategoryFunc,
   saveCategoryFunc,
   deleteCategoryFunc,
-} from "@/components/task/taskHandlers";
+} from "@/pages/panel/task/taskHandlers";
 
 export const Task = () => {
   //useStates

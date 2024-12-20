@@ -8,7 +8,7 @@ import {
 import { EventType } from "@/store/slices/taskSlice";
 import moment from "moment";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TaskDetails } from "../task/task-detail";
+import { TaskDetails } from "@/pages/panel/task/task-detail";
 
 interface MiniCalendarProps extends React.HTMLAttributes<HTMLElement> {
   date: Date;
