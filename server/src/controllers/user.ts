@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { NextFunction, Request, Response } from "express";
 import User, { UserAccount } from "../models/user"; // Adjust import path as needed
 import createError from "../utils/createError"; // Import the createError function
@@ -24,14 +23,10 @@ class UserController {
         return next(createError(400, "Username already exists"));
       }
 
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
       // Create new user
       const newUser = new User({
         username,
-        password: hashedPassword,
+        password,
         firstName,
         lastName,
         roles,
@@ -69,7 +64,6 @@ class UserController {
       const query = role ? { roles: role as string } : {};
 
       const users = await User.find(query)
-        .select("-password") // Exclude password
         .skip((pageNumber - 1) * limitNumber)
         .limit(limitNumber);
 
@@ -94,7 +88,7 @@ class UserController {
   // Get user by ID
   async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await User.findById(req.params.id).select("-password"); // Exclude password
+      const user = await User.findById(req.params.id);
 
       if (!user) {
         return next(createError(404, "User not found"));
@@ -172,17 +166,13 @@ class UserController {
       }
 
       // Verify current password
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      const isMatch = currentPassword === user.password;
       if (!isMatch) {
         return next(createError(400, "Current password is incorrect"));
       }
 
-      // Hash new password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-
       // Update password and reset password change flag
-      user.password = hashedPassword;
+      user.password = newPassword;
       user.settings = { isPassChange: true };
       await user.save();
 

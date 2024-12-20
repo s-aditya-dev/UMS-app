@@ -1,66 +1,71 @@
-import bcrypt from "bcryptjs";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "../config/dotenv";
-import User, { UserAccount } from "../models/user";
+import User from "../models/user";
 import createError from "../utils/createError";
 
-// Helper function to create a JWT token
-const createToken = (user: UserAccount): string => {
-  return jwt.sign(
-    {
-      username: user.username,
-      role: user.roles,
-    },
-    JWT_SECRET,
-    { expiresIn: "5h" },
-  );
-};
+class AuthController {
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password } = req.body;
 
-// Login function
-export const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const { username, password } = req.body;
+      // Validate input
+      if (!email || !password) {
+        return next(createError(400, "Email and password are required"));
+      }
 
-    // Find user by username
-    const user = await User.findOne({ username });
-    if (!user) return next(createError(404, "User not found"));
+      // Find user
+      const user = await User.findOne({ email });
+      if (!user) {
+        return next(createError(404, "User not found"));
+      }
 
-    // Check password validity
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) return next(createError(400, "Invalid credentials"));
+      // Verify password
+      const isValidPassword = (await user.password) == password;
+      if (!isValidPassword) {
+        return next(createError(401, "Invalid password"));
+      }
 
-    // Create JWT token
-    let token = null;
-    if (user.username && user.roles) token = createToken(user);
-    if (!token) return next(createError(400, "Invalid user datatype"));
-    // Send response with token as httpOnly cookie
-    const { password: _, ...userInfo } = user.toObject(); // Exclude password from response
-    res
-      .cookie("accessToken", token, {
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET || "fallback_secret",
+        { expiresIn: "24h" },
+      );
+
+      // Set token in cookie
+      res.cookie("access_token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Secure cookie in production
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-      })
-      .status(200)
-      .json(userInfo);
-  } catch (err) {
-    next(err);
-  }
-};
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      });
 
-// Logout function
-export const logout = (req: Request, res: Response): void => {
-  res
-    .clearCookie("accessToken", {
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user.toObject();
+
+      // Send response
+      res.status(200).json({
+        success: true,
+        data: userWithoutPassword,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async logout(_req: Request, res: Response) {
+    // Clear the access token cookie
+    res.clearCookie("access_token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-    })
-    .status(200)
-    .send("User has been logged out");
-};
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }
+}
+
+export default new AuthController();

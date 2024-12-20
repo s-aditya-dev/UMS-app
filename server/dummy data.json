@@ -1,13 +1,62 @@
-{
-  "username": "johndoe",
-  "password": "StrongPassword123",
-  "firstName": "John",
-  "lastName": "Doe",
-  "roles": [
-    "admin",
-    "user"
-  ],
-  "email": "johndoe@example.com",
-  "phone": "+1234567890",
-  "dob": "1990-01-01"
-}
+[
+  {
+    "username": "johndoe",
+    "password": "StrongPassword123",
+    "firstName": "John",
+    "lastName": "Doe",
+    "roles": ["admin", "user"],
+    "email": "johndoe@example.com",
+    "phone": "+1234567890",
+    "dob": "1990-01-01"
+  },
+  {
+    "username": "janedoe",
+    "password": "SecurePass456",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "roles": ["user"],
+    "email": "janedoe@example.com",
+    "phone": "+9876543210",
+    "dob": "1992-03-15"
+  },
+  {
+    "username": "bobjohnson",
+    "password": "Passw0rd789!",
+    "firstName": "Bob",
+    "lastName": "Johnson",
+    "roles": ["admin", "user"],
+    "email": "bobjohnson@example.com",
+    "phone": "+1928374650",
+    "dob": "1985-07-20"
+  },
+  {
+    "username": "alicemartin",
+    "password": "AlicePwd#2023",
+    "firstName": "Alice",
+    "lastName": "Martin",
+    "roles": ["moderator", "user"],
+    "email": "alicemartin@example.com",
+    "phone": "+1230987456",
+    "dob": "1995-12-05"
+  },
+  {
+    "username": "charlietaylor",
+    "password": "Char!ie2021",
+    "firstName": "Charlie",
+    "lastName": "Taylor",
+    "roles": ["user"],
+    "email": "charlietaylor@example.com",
+    "phone": "+1203456789",
+    "dob": "1993-09-09"
+  },
+  {
+    "username": "emilyclark",
+    "password": "Emily@Clark88",
+    "firstName": "Emily",
+    "lastName": "Clark",
+    "roles": ["admin"],
+    "email": "emilyclark@example.com",
+    "phone": "+1987654321",
+    "dob": "1988-04-22"
+  }
+]
