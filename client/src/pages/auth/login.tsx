@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import newRequest from "@/utils/newRequest";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,14 +13,14 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { useToast } from "@/hooks/use-toast";
 import { formatZodErrors } from "@/utils/zodUtils";
 import { ArrowRight } from "lucide-react";
 import { LoginUserSchema } from "@/../../shared/zod-schema/user";
+import { CustomAxiosError } from "@/utils/AxiosTypes";
 
 interface LoginUser {
-  username: string;
+  loginId: string;
   password: string;
 }
 
@@ -32,10 +31,23 @@ export function LoginForm() {
 
   // useStates:-
   const [user, setUser] = useState<LoginUser>({
-    username: "",
+    loginId: "",
     password: "",
   });
   const [remember, setRemember] = useState<boolean>(false);
+
+  // useEffect
+  useEffect(() => {
+    const storedLoginId = localStorage.getItem("rememberedLoginId");
+
+    if (storedLoginId) {
+      setUser({
+        loginId: storedLoginId,
+        password: "",
+      });
+      setRemember(true);
+    }
+  }, []);
 
   // Event Handlers:-
   const handleInputChange = (
@@ -45,14 +57,51 @@ export function LoginForm() {
     setUser({ ...user, [field]: value });
   };
 
+  const handleRememberMe = (loginId: string) => {
+    if (remember) {
+      localStorage.setItem("rememberedLoginId", loginId);
+    } else {
+      localStorage.removeItem("rememberedLoginId");
+    }
+  };
+
   const handleLogin = async (user: LoginUser) => {
+    console.log(user);
     try {
       const res = await newRequest.post("/auth/login", user);
-      localStorage.setItem("currentUser", JSON.stringify(res.data));
-      console.log("Success:", user);
-      navigate("/panel");
-    } catch (err) {
-      console.log(err);
+
+      if (res.data.data.settings.isRegistered) {
+        navigate(`/auth/register-user/${res.data.data._id}`);
+      } else if (res.data.data.settings.isPassChange) {
+        navigate(`/auth/change-password/${res.data.data._id}`);
+      } else navigate("/panel/dashboard");
+
+      handleRememberMe(user.loginId);
+      console.log("Success:", res.data.data.firstName);
+    } catch (error) {
+      const axiosError = error as CustomAxiosError;
+      console.log(axiosError);
+      if (axiosError.response) {
+        if (axiosError.response.data.error) {
+          toast({
+            title: "Login Error",
+            description: axiosError.response.data.error,
+            variant: "destructive",
+          });
+          return;
+        }
+        console.log("Status code:", axiosError.response.status);
+        console.log("Data:", axiosError.response.data);
+      } else {
+        if (axiosError.code === "ERR_NETWORK")
+          toast({
+            title: "Server Issue",
+            description: `• ${axiosError.message}`,
+            variant: "destructive",
+          });
+
+        console.log(axiosError.message);
+      }
     }
   };
 
@@ -85,16 +134,16 @@ export function LoginForm() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="username" className="text-base">
-                Email
+                Email or Username
               </Label>
               <Input
                 id="username"
                 type="username"
                 placeholder="tony.stark@3000"
                 required
-                value={user.username}
+                value={user.loginId}
                 className="text-base"
-                onChange={(e) => handleInputChange("username", e.target.value)}
+                onChange={(e) => handleInputChange("loginId", e.target.value)}
               />
             </div>
             <div className="grid gap-2">
@@ -107,6 +156,7 @@ export function LoginForm() {
                 value={user.password}
                 className="text-base"
                 onChange={(e) => handleInputChange("password", e.target.value)}
+                autoComplete="off"
               />
             </div>
 

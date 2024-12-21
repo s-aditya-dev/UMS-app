@@ -1,6 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
 import { AppDispatch } from "@/store";
-import { userType } from "@/store/slices/userSlice";
+import { userType } from "@/../../shared/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
 import { generateUniqueId } from "@/utils/func/uniqueId";
 import { FullUserSchema } from "@/utils/zod schemas/userSchema";

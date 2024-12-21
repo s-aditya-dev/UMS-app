@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { userType } from "@/store/slices/userSlice";
+import { userType } from "@/../../shared/types/user";
 import { useNavigate } from "react-router-dom";
 
 interface UserActionProps {

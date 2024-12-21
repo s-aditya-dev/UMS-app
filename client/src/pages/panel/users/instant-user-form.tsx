@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AppDispatch } from "@/store";
-import { userType } from "@/store/slices/userSlice";
+import { userType } from "@/../../shared/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
 import { InstantUserSchema } from "@/utils/zod schemas/userSchema";
 import { generateUniqueId } from "@/utils/func/uniqueId";

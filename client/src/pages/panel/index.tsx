@@ -20,7 +20,7 @@ export const Panel = () => {
   //Event Handlers
   const handleLogout = () => {
     //Logout Logic
-    navigate("/login");
+    navigate("/auth/login");
   };
 
   const handleSetPage = useCallback((newPage: string) => {

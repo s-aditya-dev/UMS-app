@@ -1,10 +1,6 @@
 import { AppDispatch, RootState } from "@/store";
-import {
-  addUser,
-  removeUser,
-  updateUser,
-  userType,
-} from "@/store/slices/userSlice";
+import { addUser, removeUser, updateUser } from "@/store/slices/userSlice";
+import { userType } from "@/../../shared/types/user";
 import { useSelector } from "react-redux";
 
 export const generateUsername = (firstName: string) => {

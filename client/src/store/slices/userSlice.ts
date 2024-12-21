@@ -1,23 +1,6 @@
 import { userList } from "@/store/data/user-list";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface userType {
-  _id: string;
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  roles: string[];
-  dob?: Date;
-  email?: string;
-  phone?: string;
-  isLocked: boolean;
-  permissions?: object;
-  settings?: {
-    isRegistered?: boolean;
-    isPassChange: boolean;
-  };
-}
+import { userType } from "@/../../shared/types/user";
 
 const initialState: userType[] = userList;
 
