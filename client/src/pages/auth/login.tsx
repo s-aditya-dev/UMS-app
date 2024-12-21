@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import newRequest from "@/utils/newRequest";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +45,14 @@ export function LoginForm() {
     setUser({ ...user, [field]: value });
   };
 
-  const handleLogin = (user: LoginUser) => {
+  const handleLogin = async (user: LoginUser) => {
     try {
+      const res = await newRequest.post("/auth/login", user);
+      localStorage.setItem("currentUser", JSON.stringify(res.data));
       console.log("Success:", user);
       navigate("/panel");
-    } catch {
-      console.log("Error");
+    } catch (err) {
+      console.log(err);
     }
   };
 
