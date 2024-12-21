@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import newRequest from "@/utils/newRequest";
+import newRequest from "@/utils/func/request";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,10 +14,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { formatZodErrors } from "@/utils/zodUtils";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { ArrowRight } from "lucide-react";
-import { LoginUserSchema } from "@/../../shared/zod-schema/user";
-import { CustomAxiosError } from "@/utils/AxiosTypes";
+import { LoginUserSchema } from "@/utils/zod-schema/user";
+import { CustomAxiosError } from "@/utils/types/axios";
 
 interface LoginUser {
   loginId: string;

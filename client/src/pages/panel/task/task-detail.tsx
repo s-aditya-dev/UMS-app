@@ -1,4 +1,4 @@
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { Button } from "@/components/ui/button";
 import {

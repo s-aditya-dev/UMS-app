@@ -3,7 +3,7 @@ import { Calendar } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import { setEventColor } from "@/components/calendar/calendarFunc";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";

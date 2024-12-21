@@ -32,7 +32,7 @@ import { generateUniqueId } from "@/utils/func/uniqueId";
 import { ReactNode, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 
 const usersList = [
   { value: "Alice Johnson", label: "Alice Johnson" },

@@ -1,4 +1,4 @@
-import { userType } from "@/store/slices/userSlice";
+import { userType } from "@/utils/types/user";
 
 export const userList: userType[] = [
   {

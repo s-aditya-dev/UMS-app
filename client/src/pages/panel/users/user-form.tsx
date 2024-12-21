@@ -1,10 +1,10 @@
 import { useToast } from "@/hooks/use-toast";
 import { AppDispatch } from "@/store";
-import { userType } from "@/../../shared/types/user";
+import { userType } from "@/utils/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
 import { generateUniqueId } from "@/utils/func/uniqueId";
-import { FullUserSchema } from "@/utils/zod schemas/userSchema";
-import { formatZodErrors } from "@/utils/zodUtils";
+import { FullUserSchema } from "@/utils/zod-schema/user";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { useState } from "react";
 import { useDispatch } from "react-redux";

@@ -10,10 +10,10 @@ import {
 import { PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { formatZodErrors } from "@/utils/zodUtils";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { passwordSchema } from "@/../../shared/zod-schema/password";
+import { passwordSchema } from "@/utils/zod-schema/password";
 
 interface ChangePassword {
   current_password: string;

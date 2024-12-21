@@ -4,7 +4,7 @@ import { UserHeader } from "@/pages/panel/users/user-header";
 import { UserTable } from "@/pages/panel/users/user-table";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { usePagination } from "@/hooks/use-pagination";
-import { search } from "@/utils/searchUtils";
+import { search } from "@/utils/func/searchUtils";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 

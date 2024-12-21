@@ -5,7 +5,7 @@ import {
   setEventColor,
   handleEventClick,
 } from "./calendarFunc";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import moment from "moment";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TaskDetails } from "@/pages/panel/task/task-detail";

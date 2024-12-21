@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { UserAction } from "@/pages/panel/users/user-actions";
-import { userType } from "@/../../shared/types/user";
+import { userType } from "@/utils/types/user";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 

@@ -1,5 +1,5 @@
 import moment from "moment";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 
 export function setEventColor(event: EventType) {
   if (event.status == "Canceled") return "bg-red-800 line-through decoration-2";

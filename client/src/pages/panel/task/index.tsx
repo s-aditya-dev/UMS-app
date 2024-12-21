@@ -5,7 +5,7 @@ import { events as initialEvent } from "@/store/data/events";
 import { CategoriesFilter } from "@/pages/panel/task/categories";
 import { ShadcnCal } from "@/components/calendar/Shadcn Calender";
 import "react-big-calendar/lib/css/react-big-calendar.css"; //CSS import for styling calendar
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import {
   getUniqueCategories,
   filterCategoryFunc,

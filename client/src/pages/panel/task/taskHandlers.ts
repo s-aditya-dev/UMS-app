@@ -1,4 +1,4 @@
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 
 //-----Categroy related functions-----
 // Get unique categories from the events

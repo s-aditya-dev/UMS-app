@@ -1,4 +1,4 @@
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 export const events: EventType[] = [
   {
     id: "1",

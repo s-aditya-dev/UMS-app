@@ -8,7 +8,7 @@ import {
 } from "react-big-calendar";
 import moment from "moment";
 import { setEventColor } from "./calendarFunc";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import { TaskDetails } from "@/pages/panel/task/task-detail";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 

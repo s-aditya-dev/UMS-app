@@ -12,11 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AppDispatch } from "@/store";
-import { userType } from "@/../../shared/types/user";
+import { userType } from "@/utils/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
-import { InstantUserSchema } from "@/utils/zod schemas/userSchema";
+import { InstantUserSchema } from "@/utils/zod-schema/user";
 import { generateUniqueId } from "@/utils/func/uniqueId";
-import { formatZodErrors } from "@/utils/zodUtils";
+import { formatZodErrors } from "@/utils/func/zodUtils";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { MultiSelect } from "@/components/custom ui/multi-select";

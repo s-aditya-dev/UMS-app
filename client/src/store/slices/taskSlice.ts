@@ -1,30 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { events } from "../data/events";
 
-export type EventType = {
-  id: string;
-  title: string;
-  description: string;
-  start: Date;
-  end: Date;
-  month_year: string;
-  assignedBy: string;
-  category: string;
-  priority: string;
-  status: string;
-  participants: string[];
-};
-
-interface TaskMetaData {
-  categories: string[];
-  priorityList: string[];
-  statusList: string[];
-}
-
-interface TaskState {
-  TaskInitialData: TaskMetaData;
-  Events: EventType[];
-}
+import { EventType, TaskState } from "@/utils/types/task";
 
 const initialState: TaskState = {
   TaskInitialData: {

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useState, useCallback, useMemo } from "react";
 import { Calendar } from "./calendar";
 import { MiniCalendar } from "./mini-calendar";
-import { EventType } from "@/store/slices/taskSlice";
+import { EventType } from "@/utils/types/task";
 import { Views } from "react-big-calendar";
 
 type Keys = keyof typeof Views;

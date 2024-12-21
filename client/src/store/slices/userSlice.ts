@@ -1,6 +1,6 @@
 import { userList } from "@/store/data/user-list";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { userType } from "@/../../shared/types/user";
+import { userType } from "@/utils/types/user";
 
 const initialState: userType[] = userList;
 
