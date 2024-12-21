@@ -57,7 +57,14 @@ export const InstantUserSchema = BaseUserSchema.partial({
 });
 
 // Login Form Schema (Only username and password)
-export const LoginUserSchema = BaseUserSchema.pick({
-  username: true,
-  password: true,
+export const LoginUserSchema = BaseUserSchema.pick({ password: true }).extend({
+  loginId: z.string().refine(
+    (value) =>
+      /^[a-zA-Z0-9_.@]*$/.test(value) || // Username pattern
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), // Email pattern
+    {
+      message:
+        "Login ID must be a valid email or username (letters, numbers, underscores, @, and periods only).",
+    },
+  ),
 });
