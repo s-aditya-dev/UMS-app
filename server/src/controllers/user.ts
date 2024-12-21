@@ -157,7 +157,7 @@ class UserController {
   // Change password
   async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword, newPassword, isPassChange = true } = req.body;
 
       // Find user by ID
       const user = await User.findById(req.params.id);
@@ -173,7 +173,7 @@ class UserController {
 
       // Update password and reset password change flag
       user.password = newPassword;
-      user.settings = { isPassChange: true };
+      user.settings = { isPassChange: isPassChange };
       await user.save();
 
       res.status(200).json({ message: "Password changed successfully" });
