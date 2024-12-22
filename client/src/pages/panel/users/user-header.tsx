@@ -41,7 +41,7 @@ export const UserHeader = ({
         <UserAddButton />
       </div>
 
-      <h2 className="font-semibold text-lg">{recordLabel}</h2>
+      <h2 className="font-semibold text-lg">Record Count: of {recordLabel}</h2>
 
       <PaginationControls
         currPage={currPage}

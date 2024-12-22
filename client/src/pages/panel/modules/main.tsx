@@ -9,7 +9,7 @@ import { Route, Routes, useLocation } from "react-router-dom";
 //Pages
 import { Dashboard } from "@/pages/panel/dashboard";
 import { Task } from "@/pages/panel/task";
-import { UserDetails } from "@/pages/panel/user-details";
+import { UserDetails } from "@/pages/panel/user-details/index";
 import { UserList } from "@/pages/panel/users";
 
 interface MainProps extends React.HTMLAttributes<HTMLElement> {
@@ -49,9 +49,8 @@ const MainBody: React.FC<MainProps> = ({
     dashboard: <Dashboard />,
     analytics: <Maintainance />,
     "users/": <UserList />,
-    "users/:pageno": <UserList />,
     "users/form": <Maintainance />,
-    "users/:pageno/details/:id": <UserDetails />,
+    "users/details/:id": <UserDetails />,
     "client-list/:pageno": <Maintainance />,
     "dump-client-list": <Maintainance />,
     "new-client-list": <Maintainance />,

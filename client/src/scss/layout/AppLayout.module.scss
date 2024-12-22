@@ -1,4 +1,5 @@
-@import "../variable.scss";
+/* @import "../variable.scss"; */
+@use "../variable" as *;
 
 .AppLayout {
   display: grid;
@@ -26,7 +27,7 @@
     grid-template-rows: $NavHeight calc(100svh - $NavHeight);
     grid-template-areas: "sidebar nav" "sidebar content";
 
-    .AppContent{
+    .AppContent {
       height: 100%; //This is important for scroll area component
       display: flex;
       justify-content: center;

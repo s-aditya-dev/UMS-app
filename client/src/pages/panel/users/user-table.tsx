@@ -33,7 +33,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
             <TableHead className="whitespace-nowrap">Employee Name</TableHead>
             <TableHead>Username</TableHead>
             <TableHead>Password</TableHead>
-            <TableHead>Status</TableHead>
+            {/* <TableHead>Status</TableHead> */}
             <TableHead>Account</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Action</TableHead>
@@ -49,7 +49,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
           ) : (
             userList.map((user, index) => (
               <TableRow key={user._id} className="hover:bg-card">
-                <TableCell>{firstIndex + index + 1}</TableCell>
+                <TableCell>{firstIndex + index}</TableCell>
                 <TableCell className="whitespace-nowrap">
                   {user.firstName + " " + user.lastName}
                 </TableCell>
@@ -57,11 +57,11 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                 <TableCell>
                   {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Badge className="cursor-default" variant={`success`}>
                     Active
                   </Badge>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
                 <TableCell>{user.roles[0]}</TableCell>
                 <TableCell>

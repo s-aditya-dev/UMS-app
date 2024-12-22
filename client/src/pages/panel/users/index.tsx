@@ -1,96 +1,81 @@
-import { UserFooter } from "@/pages/panel/users/user-footer";
-import { getUsers } from "@/pages/panel/users/user-func";
-import { UserHeader } from "@/pages/panel/users/user-header";
-import { UserTable } from "@/pages/panel/users/user-table";
+import { Loader } from "@/components/custom ui/loader";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { usePagination } from "@/hooks/use-pagination";
-import { search } from "@/utils/func/searchUtils";
+import { UserTable } from "@/pages/panel/users/user-table";
+import useUserStore, { useUsers } from "@/store/zustand/users";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { UserFooter } from "./user-footer";
+import { UserHeader } from "./user-header";
+import { CustomAxiosError } from "@/utils/types/axios";
 
 export const UserList = () => {
-  // Redux Selector
-  const userList = getUsers();
-
-  // use States
-  const [searchTerm, setSearchTerm] = useState<string>("");
-
-  // Hooks
+  const [searchTerm, setSearchTerm] = useState("");
   const { setBreadcrumbs } = useBreadcrumb();
-  const { pageno } = useParams();
-  const navigate = useNavigate();
-  const PaginationState = usePagination(
-    userList,
-    5,
-    pageno ? parseInt(pageno, 10) : 1,
-  );
-  const {
-    setPageData,
-    records,
-    handleNextPage,
-    handlePreviousPage,
-    handleNthPage,
-  } = PaginationState;
 
-  // Event Handlers
-  const navigateToNextPage = () => {
-    handleNextPage();
-    navigate(`/panel/users/${PaginationState.currPage + 1}`);
+  const { currentPage, itemsPerPage, setCurrentPage } = useUserStore();
+  const { data, isLoading, error } = useUsers({
+    page: currentPage,
+    limit: itemsPerPage,
+    role: undefined,
+  });
+
+  const paginationData = data && {
+    lastIndex: currentPage * itemsPerPage,
+    firstIndex: currentPage * itemsPerPage - itemsPerPage,
+    totalUsers: data.totalUsers,
   };
 
-  const navigateToPreviousPage = () => {
-    handlePreviousPage();
-    navigate(`/panel/users/${PaginationState.currPage - 1}`);
-  };
-
-  const navigateToNthPage = (nthPageNumber: number) => {
-    handleNthPage(nthPageNumber);
-    navigate(`/panel/users/${nthPageNumber}`);
+  const navigation = {
+    navigateToNextPage: () => {
+      setCurrentPage(currentPage + 1);
+    },
+    navigateToPreviousPage: () => {
+      setCurrentPage(currentPage - 1);
+    },
+    navigateToNthPage: (nthPageNumber: number) => {
+      setCurrentPage(nthPageNumber);
+    },
   };
 
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
-    if (term) {
-      const filteredResults = search(userList, term, [
-        "firstName",
-        "lastName",
-        "username",
-      ]);
-      setPageData(filteredResults);
-    } else setPageData(userList);
-    navigateToNthPage(1);
+    navigation.navigateToNthPage(1);
   };
 
-  // use Effects
   useEffect(() => {
-    setPageData(userList);
     setBreadcrumbs([{ label: "Users" }]);
-  }, [userList]); // Automatically updates when `userList` changes
+  }, []);
 
-  useEffect(() => {
-    if (!pageno) {
-      navigate("1");
-      PaginationState.setCurrPage(1);
-    }
-  }, [pageno]);
+  if (isLoading) {
+    return (
+      <div className=" h-[60svh] w-full flex justify-center items-center flex-col gap-2">
+        <Loader />
+      </div>
+    );
+  }
+
+  const e = error as CustomAxiosError;
+  if (error) {
+    console.log(error);
+    return <div>Error occurred: {e.response?.data.error}</div>;
+  }
 
   return (
     <div className="w-full flex items-center flex-col gap-2">
       <UserHeader
-        nthClick={navigateToNthPage}
-        prevClick={navigateToPreviousPage}
-        nextClick={navigateToNextPage}
-        currPage={PaginationState.currPage}
-        nPage={PaginationState.npages}
+        nthClick={navigation.navigateToNthPage}
+        prevClick={navigation.navigateToPreviousPage}
+        nextClick={navigation.navigateToNextPage}
+        currPage={data?.currentPage}
+        nPage={data?.totalPages}
         searchTerm={searchTerm}
         setSearchTerm={handleSearchChange}
-        recordLabel={PaginationState.recordCounter}
+        recordLabel={paginationData?.recordCounter || ""}
       />
-      <UserTable userList={records} firstIndex={PaginationState.firstIndex} />
-      <UserFooter
-        currPage={PaginationState.currPage}
-        npages={PaginationState.npages}
+      <UserTable
+        userList={data?.users || []}
+        firstIndex={paginationData?.firstIndex || 1}
       />
+      <UserFooter currPage={data?.currentPage} npages={data?.totalPages} />
     </div>
   );
 };

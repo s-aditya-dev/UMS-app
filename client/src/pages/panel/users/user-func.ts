@@ -1,5 +1,10 @@
 import { AppDispatch, RootState } from "@/store";
-import { addUser, removeUser, updateUser } from "@/store/slices/userSlice";
+import {
+  setUsers,
+  addUser,
+  removeUser,
+  updateUser,
+} from "@/store/slices/userSlice";
 import { userType } from "@/utils/types/user";
 import { useSelector } from "react-redux";
 
@@ -15,6 +20,10 @@ export const generatePassword = () => {
 export const getUsers = () => {
   const users = useSelector((state: RootState) => state.userList);
   return users;
+};
+
+export const setUser = (users: userType[], dispatch: AppDispatch) => {
+  dispatch(setUsers(users));
 };
 
 export const createUser = (user: userType, dispatch: AppDispatch) => {

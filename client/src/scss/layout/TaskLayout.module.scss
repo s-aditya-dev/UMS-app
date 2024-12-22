@@ -1,4 +1,5 @@
-@import "../variable.scss";
+/* @import "../variable.scss"; */
+@use "../variable" as *;
 
 .TaskLayout {
   width: 100%;

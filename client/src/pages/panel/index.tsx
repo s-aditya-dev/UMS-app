@@ -9,6 +9,7 @@ import { Nav } from "./modules/nav";
 import { Sidebar } from "./modules/sidebar";
 
 import { NavLinks } from "./data";
+import newRequest from "@/utils/func/request";
 
 export const Panel = () => {
   // useStates
@@ -18,9 +19,14 @@ export const Panel = () => {
   const navigate = useNavigate();
 
   //Event Handlers
-  const handleLogout = () => {
+  const handleLogout = async () => {
     //Logout Logic
     navigate("/auth/login");
+    try {
+      await newRequest.post("/auth/logout");
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleSetPage = useCallback((newPage: string) => {

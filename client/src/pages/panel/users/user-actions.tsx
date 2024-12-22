@@ -10,6 +10,7 @@ import { Ellipsis } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { userType } from "@/utils/types/user";
 import { useNavigate } from "react-router-dom";
+import useUserStore, { useUpdateUser } from "@/store/zustand/users";
 
 interface UserActionProps {
   user: userType;
@@ -24,10 +25,20 @@ export const UserAction = ({
 }: UserActionProps) => {
   // Hooks
   const navigate = useNavigate();
-
+  const updateUser = useUpdateUser();
+  const { setSelectedUserId } = useUserStore();
   // Event Handlers
   const handleOpenDetails = (id: string) => {
     navigate(`details/${id}`);
+    setSelectedUserId(id);
+  };
+
+  const handleLockUser = async (id: string) => {
+    const updates: Partial<userType> = user.isLocked
+      ? { isLocked: false }
+      : { isLocked: true };
+    const reponse = await updateUser.mutate({ userId: id, updates });
+    console.log(reponse);
   };
 
   return (
@@ -47,7 +58,9 @@ export const UserAction = ({
         <DropdownMenuItem onClick={() => handleOpenDetails(user._id)}>
           Open Details
         </DropdownMenuItem>
-        <DropdownMenuItem>Quick preview</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleLockUser(user._id)}>
+          {!user.isLocked ? "Lock user" : "Unlock User"}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
