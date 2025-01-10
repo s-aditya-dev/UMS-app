@@ -69,6 +69,29 @@ class AuthController {
       message: "Logged out successfully",
     });
   }
+
+  async getCurrentUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = req.cookies.Access_Token;
+      if (!token) {
+        return next(createError(401, "Access denied. No token provided"));
+      }
+
+      // Decode the JWT token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "");
+
+      // Send the decoded payload as response
+      res.status(200).json({
+        success: true,
+        data: decoded,
+      });
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        return next(createError(401, "Invalid token"));
+      }
+      return next(createError(500, "Internal server error"));
+    }
+  }
 }
 
 export default new AuthController();

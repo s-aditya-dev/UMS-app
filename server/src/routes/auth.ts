@@ -9,4 +9,7 @@ router.post("/login", AuthController.login);
 // Logout user
 router.post("/logout", AuthController.logout);
 
+// Logout user
+router.post("/current-user", AuthController.getCurrentUser);
+
 export default router;

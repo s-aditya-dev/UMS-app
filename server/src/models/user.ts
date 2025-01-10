@@ -14,6 +14,7 @@ export interface UserAccount extends Document {
   isLocked: boolean;
   permissions?: object;
   settings?: {
+    isRegistered?: boolean;
     isPassChange: boolean;
   };
 }
@@ -32,6 +33,7 @@ const userSchema = new Schema<UserAccount>({
   permissions: { type: Object, default: {} },
   settings: {
     isPassChange: { type: Boolean, default: false },
+    isRegistered: { type: Boolean, default: false },
   },
 });
 

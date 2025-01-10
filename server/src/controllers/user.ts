@@ -15,12 +15,21 @@ class UserController {
         email,
         phone,
         dob,
+        settings,
       } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ username });
       if (existingUser) {
         return next(createError(400, "Username already exists"));
+      }
+
+      // Check if email already exists
+      if (email) {
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+          return next(createError(400, "Email already exists"));
+        }
       }
 
       // Create new user
@@ -35,7 +44,7 @@ class UserController {
         dob,
         isLocked: false,
         permissions: {},
-        settings: { isPassChange: false },
+        settings: settings || { isPassChange: false, isRegistered: false },
       });
 
       await newUser.save();
@@ -54,14 +63,43 @@ class UserController {
     }
   }
 
-  // Get all users (with optional filtering)
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page = 1, limit = 10, role } = req.query;
+      const { page = 1, limit = 10, role, search } = req.query;
       const pageNumber = Number(page);
       const limitNumber = Number(limit);
 
-      const query = role ? { roles: role as string } : {};
+      let query: any = {};
+
+      if (role) {
+        query.roles = role as string;
+      }
+
+      // Add multi-field search functionality
+      if (search) {
+        const searchTerms = (search as string).trim().split(/\s+/);
+
+        // Create OR conditions for each search term
+        query.$and = searchTerms.map((term) => {
+          const termRegex = new RegExp(term, "i");
+          return {
+            $or: [
+              { username: termRegex },
+              { firstName: termRegex },
+              { lastName: termRegex },
+              // Combined name search
+              {
+                $expr: {
+                  $regexMatch: {
+                    input: { $concat: ["$firstName", " ", "$lastName"] },
+                    regex: termRegex,
+                  },
+                },
+              },
+            ],
+          };
+        });
+      }
 
       const users = await User.find(query)
         .skip((pageNumber - 1) * limitNumber)
@@ -72,6 +110,7 @@ class UserController {
       res.status(200).json({
         users,
         currentPage: pageNumber,
+        limitNumber: limitNumber,
         totalPages: Math.ceil(total / limitNumber),
         totalUsers: total,
       });
@@ -109,24 +148,28 @@ class UserController {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const {
+        username,
         firstName,
         lastName,
         email,
         phone,
         roles,
         dob,
+        isLocked,
         permissions,
         settings,
       } = req.body;
 
       // Prevent updating certain fields
       const updateData: Partial<UserAccount> = {};
+      if (username) updateData.username = username;
       if (firstName) updateData.firstName = firstName;
       if (lastName) updateData.lastName = lastName;
       if (email) updateData.email = email;
       if (phone) updateData.phone = phone;
       if (roles) updateData.roles = roles;
       if (dob) updateData.dob = dob;
+      if (typeof isLocked === "boolean") updateData.isLocked = isLocked;
       if (permissions) updateData.permissions = permissions;
       if (settings) updateData.settings = settings;
 

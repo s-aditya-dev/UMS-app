@@ -3,7 +3,7 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { DB_URI, FRONTEND_URL, PORT } from "./config/dotenv";
-import { authRoute, userRoute } from "./routes";
+import { authRoute, userRoute, roleRoute } from "./routes";
 
 // Initialize express app
 const app = express();
@@ -54,6 +54,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
+app.use("/api/role", roleRoute);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
