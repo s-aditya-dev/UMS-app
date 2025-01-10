@@ -3,7 +3,7 @@
     "concurrently": "^9.1.2"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-    "postinstall": "npm install --prefix client && npm install --prefix server"
+    "dev": "concurrently \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
+    "postinstall": "pnpm install --filter client && pnpm install --filter server"
   }
 }
