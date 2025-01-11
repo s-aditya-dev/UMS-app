@@ -19,10 +19,10 @@ router.delete("/:id", verifyToken, RoleController.deleteRole);
 // Reorder role precedences (fix gaps)
 router.post("/reorder", verifyToken, RoleController.reorderPrecedence);
 
-// Update Role
-router.patch("/:id", verifyToken, RoleController.updateRole);
-
 // Bulk update role precedences
 router.patch("/precedence", verifyToken, RoleController.updateRolePrecedences);
+
+// Update Role
+router.patch("/:id", verifyToken, RoleController.updateRole);
 
 export default router;

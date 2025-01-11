@@ -5,28 +5,29 @@ import User from "../models/user";
 import createError from "../utils/createError";
 
 interface PrecedenceUpdate {
-  _id: string;
+  _id: string; // Controller expects "_id"
   precedence: number;
+}
+
+interface UpdateRolePrecedencesRequest {
+  updates: PrecedenceUpdate[];
 }
 
 class RoleController {
   // Create a new role
   async createRole(req: Request, res: Response, next: NextFunction) {
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
       const { name, permissions, createdBy } = req.body;
 
-      const existingRole = await Role.findOne({ name }).session(session);
+      const existingRole = await Role.findOne({ name });
       if (existingRole) {
-        await session.abortTransaction();
         return next(createError(400, "Role with this name already exists"));
       }
 
       // Get the last precedence number
-      const lastPrecedenceRole = await Role.findOne({})
-        .sort({ precedence: -1 })
-        .session(session);
+      const lastPrecedenceRole = await Role.findOne({}).sort({
+        precedence: -1,
+      });
 
       const newPrecedence = lastPrecedenceRole
         ? lastPrecedenceRole.precedence + 1
@@ -40,35 +41,27 @@ class RoleController {
         updatedBy: createdBy,
       });
 
-      await role.save({ session });
-      await session.commitTransaction();
+      await role.save();
 
       res.status(201).json({
         message: "Role created successfully",
         role,
       });
     } catch (error) {
-      await session.abortTransaction();
       next(
         createError(
           500,
           error instanceof Error ? error.message : "Error creating role",
         ),
       );
-    } finally {
-      session.endSession();
     }
   }
 
   // Delete role and remove it from all users
   async deleteRole(req: Request, res: Response, next: NextFunction) {
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
-
-      const role = await Role.findById(req.params.id).session(session);
+      const role = await Role.findById(req.params.id);
       if (!role) {
-        await session.abortTransaction();
         return next(createError(404, "Role not found"));
       }
 
@@ -79,33 +72,27 @@ class RoleController {
       await User.updateMany(
         { roles: role.name },
         { $pull: { roles: role.name } },
-        { session },
       );
 
       // Update precedence of all roles with higher precedence
       await Role.updateMany(
         { precedence: { $gt: deletedPrecedence } },
         { $inc: { precedence: -1 } },
-        { session },
       );
 
       // Delete the role
-      await Role.findByIdAndDelete(req.params.id).session(session);
+      await Role.findByIdAndDelete(req.params.id);
 
-      await session.commitTransaction();
       res.status(200).json({
         message: `Role ${role.name} deleted and removed from all users. Precedences updated.`,
       });
     } catch (error) {
-      await session.abortTransaction();
       next(
         createError(
           500,
           error instanceof Error ? error.message : "Error deleting role",
         ),
       );
-    } finally {
-      session.endSession();
     }
   }
 
@@ -181,15 +168,11 @@ class RoleController {
 
   // Bulk update role precedences
   async updateRolePrecedences(req: Request, res: Response, next: NextFunction) {
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
+      const updates = req.body.updates;
 
-      const updates: PrecedenceUpdate[] = req.body.updates;
-
-      // Validate input array
+      // Input validation
       if (!Array.isArray(updates) || updates.length === 0) {
-        await session.abortTransaction();
         return next(
           createError(
             400,
@@ -198,58 +181,54 @@ class RoleController {
         );
       }
 
-      // Validate that all IDs are valid MongoDB ObjectIds
-      const areValidIds = updates.every((update) =>
-        mongoose.Types.ObjectId.isValid(update._id),
-      );
+      // Clean and validate the data
+      const cleanUpdates = updates.map((update) => ({
+        _id: String(update._id),
+        precedence: Number(update.precedence),
+      }));
 
-      if (!areValidIds) {
-        await session.abortTransaction();
-        return next(
-          createError(400, "Invalid input: One or more invalid role IDs"),
-        );
+      // Validate IDs and precedence values
+      for (const update of cleanUpdates) {
+        if (!mongoose.Types.ObjectId.isValid(update._id)) {
+          return next(createError(400, `Invalid ObjectId: ${update._id}`));
+        }
+
+        if (isNaN(update.precedence) || update.precedence < 0) {
+          return next(
+            createError(400, `Invalid precedence value: ${update.precedence}`),
+          );
+        }
       }
 
-      // Validate that precedence values are unique
-      const precedences = updates.map((u) => u.precedence);
+      // Check for duplicate precedence values
+      const precedences = cleanUpdates.map((u) => u.precedence);
       if (new Set(precedences).size !== precedences.length) {
-        await session.abortTransaction();
-        return next(
-          createError(400, "Invalid input: Precedence values must be unique"),
-        );
+        return next(createError(400, "Precedence values must be unique"));
       }
 
-      // Get all roles that are being updated
-      const roleIds = updates.map((update) => update._id);
-      const existingRoles = await Role.find({ _id: { $in: roleIds } }).session(
-        session,
-      );
-
-      // Verify all roles exist
-      if (existingRoles.length !== updates.length) {
-        await session.abortTransaction();
-        return next(createError(404, "One or more roles not found"));
-      }
-
-      // Perform all updates
-      const updatePromises = updates.map((update) =>
+      // Update roles one by one
+      const updatePromises = cleanUpdates.map((update) =>
         Role.findByIdAndUpdate(
           update._id,
           { precedence: update.precedence },
-          { new: true, session },
+          { new: true },
         ),
       );
 
       const updatedRoles = await Promise.all(updatePromises);
 
-      await session.commitTransaction();
+      // Check if any roles were not found
+      const nullRoles = updatedRoles.filter((role) => !role);
+      if (nullRoles.length > 0) {
+        return next(createError(404, "One or more roles not found"));
+      }
 
       res.status(200).json({
         message: "Role precedences updated successfully",
         roles: updatedRoles,
       });
     } catch (error) {
-      await session.abortTransaction();
+      console.error("Error in updateRolePrecedences:", error);
       next(
         createError(
           500,
@@ -258,31 +237,25 @@ class RoleController {
             : "Error updating role precedences",
         ),
       );
-    } finally {
-      session.endSession();
     }
   }
 
   // Update an existing role
   async updateRole(req: Request, res: Response, next: NextFunction) {
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
       const { name, permissions, updatedBy } = req.body;
       const roleId = req.params.id;
 
       // Find the role to update
-      const role = await Role.findById(roleId).session(session);
+      const role = await Role.findById(roleId);
       if (!role) {
-        await session.abortTransaction();
         return next(createError(404, "Role not found"));
       }
 
       // If name is being updated, check if new name already exists
       if (name && name !== role.name) {
-        const existingRole = await Role.findOne({ name }).session(session);
+        const existingRole = await Role.findOne({ name });
         if (existingRole) {
-          await session.abortTransaction();
           return next(createError(400, "Role with this name already exists"));
         }
 
@@ -290,7 +263,6 @@ class RoleController {
         await User.updateMany(
           { roles: role.name },
           { $set: { "roles.$": name } },
-          { session },
         );
       }
 
@@ -303,25 +275,20 @@ class RoleController {
           updatedBy,
           updatedAt: new Date(),
         },
-        { new: true, session },
+        { new: true },
       );
-
-      await session.commitTransaction();
 
       res.status(200).json({
         message: "Role updated successfully",
         role: updatedRole,
       });
     } catch (error) {
-      await session.abortTransaction();
       next(
         createError(
           500,
           error instanceof Error ? error.message : "Error updating role",
         ),
       );
-    } finally {
-      session.endSession();
     }
   }
 }
