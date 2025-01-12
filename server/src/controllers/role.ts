@@ -131,28 +131,25 @@ class RoleController {
 
   // Optional: Add method to fix gaps in precedence if needed
   async reorderPrecedence(req: Request, res: Response, next: NextFunction) {
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
-
       // Get all roles ordered by precedence
-      const roles = await Role.find({})
-        .sort({ precedence: 1 })
-        .session(session);
+      const roles = await Role.find({}).sort({ precedence: 1 });
 
       // Reassign precedence values to ensure they are sequential
-      for (let i = 0; i < roles.length; i++) {
-        const role = roles[i];
-        role.precedence = i + 1;
-        await role.save({ session });
-      }
+      const updatePromises = roles.map((role, index) => {
+        return Role.findByIdAndUpdate(
+          role._id,
+          { precedence: index + 1 },
+          { new: true },
+        );
+      });
 
-      await session.commitTransaction();
+      await Promise.all(updatePromises);
+
       res.status(200).json({
         message: "Role precedences reordered successfully",
       });
     } catch (error) {
-      await session.abortTransaction();
       next(
         createError(
           500,
@@ -161,8 +158,6 @@ class RoleController {
             : "Error reordering precedences",
         ),
       );
-    } finally {
-      session.endSession();
     }
   }
 
