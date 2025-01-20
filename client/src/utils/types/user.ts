@@ -15,3 +15,9 @@ export interface userType {
     isPassChange: boolean;
   };
 }
+
+export interface ChangeUserPassword {
+  currentPassword: string;
+  newPassword: string;
+  isPassChange: boolean;
+}

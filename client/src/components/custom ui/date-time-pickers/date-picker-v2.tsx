@@ -17,6 +17,7 @@ interface DatePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   placeholder?: string | null;
   className?: string;
   defaultDate?: Date;
+  disabled?: boolean;
   onDateChange: (date: Date) => void;
 }
 
@@ -25,6 +26,7 @@ export default function DatePickerV2({
   closeOnDayClick = false,
   defaultDate,
   onDateChange,
+  disabled = false,
   placeholder = null,
   className,
 }: DatePickerProps) {
@@ -76,6 +78,7 @@ export default function DatePickerV2({
             !date && "text-muted-foreground",
             className,
           )}
+          disabled={disabled}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date ? (

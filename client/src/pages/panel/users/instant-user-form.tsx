@@ -11,22 +11,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { AppDispatch } from "@/store";
 import { userType } from "@/utils/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
 import { InstantUserSchema } from "@/utils/zod-schema/user";
-import { generateUniqueId } from "@/utils/func/uniqueId";
 import { formatZodErrors } from "@/utils/func/zodUtils";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useMemo, useState } from "react";
 import { MultiSelect } from "@/components/custom ui/multi-select";
-import { createUser, generatePassword, generateUsername } from "./user-func";
-
-const roles = [
-  { label: "Admin", value: "admin" },
-  { label: "Users", value: "user" },
-  { label: "Manager", value: "manager" },
-];
+import { generatePassword, generateUsername } from "./user-func";
+import { useCreateUser } from "@/store/users";
+import { CustomAxiosError } from "@/utils/types/axios";
+import { useRoles } from "@/store/role";
 
 interface InstantUserFormProps {
   open: boolean;
@@ -38,18 +32,32 @@ export const InstantUserForm = ({
   onOpenChange,
 }: InstantUserFormProps) => {
   // Hooks
-  const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
+  const createUserMutation = useCreateUser();
+  const { rolesArray } = useRoles();
+
+  const roles = useMemo(() => {
+    if (rolesArray.data) {
+      return rolesArray.data.map((role) => ({
+        label: role,
+        value: role,
+      }));
+    }
+    return [];
+  }, [rolesArray]);
 
   // use States
-  const [newUser, setNewUser] = useState<userType>({
-    _id: "",
+  const [newUser, setNewUser] = useState<Omit<userType, "_id">>({
     username: "",
     password: "",
     firstName: "",
     lastName: "",
     roles: [],
     isLocked: false,
+    settings: {
+      isRegistered: false,
+      isPassChange: true,
+    },
   });
 
   // Event Handlers
@@ -58,10 +66,10 @@ export const InstantUserForm = ({
     value: string | string[],
   ) => {
     setNewUser({ ...newUser, [field]: value });
+    console.log(rolesArray.data);
   };
 
-  const handleCreateUser = () => {
-    const _id = generateUniqueId();
+  const handleCreateUser = async () => {
     const username = generateUsername(newUser.firstName.toLowerCase() || "");
     const password = generatePassword();
     const firstName = newUser.firstName ? toProperCase(newUser.firstName) : "";
@@ -69,7 +77,6 @@ export const InstantUserForm = ({
 
     const user = {
       ...newUser,
-      _id,
       username,
       password,
       firstName,
@@ -78,7 +85,6 @@ export const InstantUserForm = ({
 
     const validation = InstantUserSchema.safeParse(user);
 
-    console.log(validation);
     if (!validation.success) {
       const errorMessages = formatZodErrors(validation.error.errors);
 
@@ -91,8 +97,28 @@ export const InstantUserForm = ({
     }
 
     //Actual user creation logic goes here
-    createUser(user, dispatch);
-    onOpenChange(false);
+    try {
+      await createUserMutation.mutateAsync(user);
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      const Err = error as CustomAxiosError;
+      if (Err.response?.data.error) {
+        toast({
+          title: "Error occured",
+          description: `Failed to create user. ${Err.response?.data.error}`,
+          variant: "destructive",
+        });
+      } else
+        toast({
+          title: "Error occured",
+          description: "Failed to create user. Please try again.",
+          variant: "destructive",
+        });
+    }
   };
 
   return (

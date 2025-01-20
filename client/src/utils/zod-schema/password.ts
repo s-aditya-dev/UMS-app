@@ -29,4 +29,8 @@ export const passwordSchema = z
   .refine((data) => data.new_password === data.confirm_password, {
     path: ["confirm_password"], // Point to the field causing the issue
     message: "New Password and Confirm Password must match.",
+  })
+  .refine((data) => data.new_password !== data.current_password, {
+    path: ["new_password"], // Point to the field causing the issue
+    message: "New Password cannot be the same as Current Password.",
   });

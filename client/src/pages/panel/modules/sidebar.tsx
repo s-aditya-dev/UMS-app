@@ -4,9 +4,15 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import * as lucideIcons from "lucide-react";
-import { Menu, LogOut } from "lucide-react";
+import { AlignLeft, LogOut } from "lucide-react";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 // NavLink & SidebarProps interface used for both Normal Sidebar and SheetSidebar
@@ -38,17 +44,20 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={cn(
           "hidden bg-card border-r-2 w-full h-full 2xl:flex flex-col justify-start items-center",
-          className
+          className,
         )}
         {...props}
       >
-        <div id="logo" className="w-full flex-center border-b-2 text-2xl font-bold">
+        <div
+          id="logo"
+          className="w-full flex-center border-b-2 text-2xl font-bold"
+        >
           LOGO
         </div>
         <ul id="links" className="mb-auto relative">
           {NavLinks.map((item, index) => (
             <CustomListWrapper key={index} ActiveLink={currPage === item.label}>
-              <NavLink item={item}/>
+              <NavLink item={item} />
             </CustomListWrapper>
           ))}
           <CustomListWrapper
@@ -80,7 +89,9 @@ const SheetSidebar: React.FC<SidebarProps> = ({
 }) => {
   // Function to handle closing the sheet
   const handleLinkClick = () => {
-    const closeButton = document.querySelector("[data-state='open']") as HTMLElement;
+    const closeButton = document.querySelector(
+      "[data-state='open']",
+    ) as HTMLElement;
     if (closeButton) {
       closeButton.click();
     }
@@ -90,11 +101,14 @@ const SheetSidebar: React.FC<SidebarProps> = ({
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon">
-          <Menu />
+          <AlignLeft />
         </Button>
       </SheetTrigger>
       <SheetContent
-        className={cn("flex flex-col justify-start items-start gap-4", className)}
+        className={cn(
+          "flex flex-col justify-start items-start gap-4",
+          className,
+        )}
         {...props}
         side="left"
       >
@@ -104,7 +118,10 @@ const SheetSidebar: React.FC<SidebarProps> = ({
         <ScrollArea className="h-[725px] w-full">
           <ul id="links" className="h-full relative">
             {NavLinks.map((item, index) => (
-              <CustomListWrapper key={index} ActiveLink={currPage === item.label}>
+              <CustomListWrapper
+                key={index}
+                ActiveLink={currPage === item.label}
+              >
                 <NavLink item={item} linkClick={handleLinkClick} />
               </CustomListWrapper>
             ))}
@@ -143,7 +160,7 @@ const CustomListWrapper = ({
       ` text-sm font-semibold hover:text-primary/95 hover:translate-x-6 transition-transform ${
         ActiveLink ? "text-primary" : "text-primary/50"
       }`,
-      className
+      className,
     )}
     {...props}
   >
@@ -151,7 +168,13 @@ const CustomListWrapper = ({
   </li>
 );
 
-const NavLink = ({ item, linkClick }: { item: NavLink; linkClick?: (page: string) => void }) => {
+const NavLink = ({
+  item,
+  linkClick,
+}: {
+  item: NavLink;
+  linkClick?: (page: string) => void;
+}) => {
   const IconComponent = iconMap[item.icon.toLowerCase()];
 
   return (
@@ -185,6 +208,8 @@ type IconMap = { [key: string]: React.ComponentType };
 const iconMap: IconMap = Object.keys(lucideIcons)
   .filter((key) => key[0] === key[0].toUpperCase())
   .reduce((acc, key) => {
-    acc[key.toLowerCase()] = lucideIcons[key as keyof typeof lucideIcons] as React.ComponentType;
+    acc[key.toLowerCase()] = lucideIcons[
+      key as keyof typeof lucideIcons
+    ] as React.ComponentType;
     return acc;
   }, {} as IconMap);

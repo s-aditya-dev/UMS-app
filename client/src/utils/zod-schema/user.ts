@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Base Schema
 const BaseUserSchema = z.object({
-  _id: z.string(),
+  _id: z.string().optional(),
   username: z
     .string()
     .min(6)
@@ -51,6 +51,7 @@ export const FullUserSchema = BaseUserSchema.extend({
 
 // Instant User Form Schema (Some fields optional)
 export const InstantUserSchema = BaseUserSchema.partial({
+  _id: true,
   email: true,
   phone: true,
   dob: true,

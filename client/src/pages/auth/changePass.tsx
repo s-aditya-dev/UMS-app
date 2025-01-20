@@ -12,8 +12,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { passwordSchema } from "@/utils/zod-schema/password";
+import { useChangeUserPassword } from "@/store/users"; // Adjust the import path as needed
+import { AxiosError } from "axios";
+import newRequest from "@/utils/func/request";
 
 interface ChangePassword {
   current_password: string;
@@ -22,9 +25,11 @@ interface ChangePassword {
 }
 
 export function ChangePass() {
-  // Hooks::-
+  // Hooks
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const changePassword = useChangeUserPassword();
 
   const [passwords, setPasswords] = useState<ChangePassword>({
     current_password: "",
@@ -39,21 +44,50 @@ export function ChangePass() {
     setPasswords({ ...passwords, [field]: value });
   };
 
-  const handleSubmission = (passwords: ChangePassword) => {
+  const handleSubmission = async (passwords: ChangePassword) => {
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "User ID is missing",
+        variant: "destructive",
+      });
+      return <div>error: User ID is missing</div>;
+    }
+
     try {
-      console.log(passwords);
-      navigate("/login");
-    } catch {
-      console.log("Error");
+      await changePassword.mutateAsync({
+        userId: id,
+        passwords: {
+          currentPassword: passwords.current_password,
+          newPassword: passwords.new_password,
+          isPassChange: false,
+        },
+      });
+
+      toast({
+        title: "Success",
+        description: "Password changed successfully. Please log in again.",
+        variant: "success",
+      });
+
+      await newRequest.post("/auth/logout");
+      navigate("/auth/login");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof AxiosError
+            ? error.response?.data.error
+            : "Failed to change password",
+        variant: "destructive",
+      });
     }
   };
 
   const handleSave = () => {
     const validation = passwordSchema.safeParse(passwords);
-
     if (!validation.success) {
       const errorMessages = formatZodErrors(validation.error.errors);
-
       toast({
         title: "Password Submission Error",
         description: `Please correct the following errors:\n${errorMessages}`,
@@ -62,7 +96,6 @@ export function ChangePass() {
       return;
     }
 
-    //Actual user creation logic goes here
     handleSubmission(passwords);
   };
 
@@ -79,10 +112,11 @@ export function ChangePass() {
             <PasswordInput
               id="current"
               value={passwords.current_password}
-              autoComplete="new-password"
+              autoComplete="current-password"
               onChange={(e) =>
                 handleInputChange("current_password", e.target.value)
               }
+              disabled={changePassword.isPending}
             />
           </div>
           <div className="space-y-1">
@@ -94,6 +128,7 @@ export function ChangePass() {
               onChange={(e) =>
                 handleInputChange("new_password", e.target.value)
               }
+              disabled={changePassword.isPending}
             />
           </div>
           <div className="space-y-1">
@@ -105,11 +140,14 @@ export function ChangePass() {
               onChange={(e) =>
                 handleInputChange("confirm_password", e.target.value)
               }
+              disabled={changePassword.isPending}
             />
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSave}>Save password</Button>
+          <Button onClick={handleSave} disabled={changePassword.isPending}>
+            {changePassword.isPending ? "Saving..." : "Save password"}
+          </Button>
         </CardFooter>
       </Card>
     </div>

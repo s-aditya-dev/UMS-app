@@ -9,8 +9,12 @@ import {
 } from "@/components/ui/table";
 import { UserAction } from "@/pages/panel/users/user-actions";
 import { userType } from "@/utils/types/user";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 
 interface UserTableProps {
   userList: userType[];
@@ -33,7 +37,6 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
             <TableHead className="whitespace-nowrap">Employee Name</TableHead>
             <TableHead>Username</TableHead>
             <TableHead>Password</TableHead>
-            {/* <TableHead>Status</TableHead> */}
             <TableHead>Account</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Action</TableHead>
@@ -49,7 +52,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
           ) : (
             userList.map((user, index) => (
               <TableRow key={user._id} className="hover:bg-card">
-                <TableCell>{firstIndex + index}</TableCell>
+                <TableCell>{firstIndex + index + 1}</TableCell>
                 <TableCell className="whitespace-nowrap">
                   {user.firstName + " " + user.lastName}
                 </TableCell>
@@ -57,13 +60,17 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                 <TableCell>
                   {showPass === user._id ? user.password : "••••••••"}
                 </TableCell>
-                {/* <TableCell>
-                  <Badge className="cursor-default" variant={`success`}>
-                    Active
-                  </Badge>
-                </TableCell> */}
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
-                <TableCell>{user.roles[0]}</TableCell>
+                <TableCell className="cursor-default">
+                  <HoverCard>
+                    <HoverCardTrigger>{user.roles[0]}</HoverCardTrigger>
+                    <HoverCardContent className="w-auto">
+                      <div className="text-sm font-semibold">
+                        Roles assigned : {user.roles.join(", ")}
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </TableCell>
                 <TableCell>
                   <UserAction
                     user={user}

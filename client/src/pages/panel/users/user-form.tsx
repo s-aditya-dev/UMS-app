@@ -1,13 +1,10 @@
 import { useToast } from "@/hooks/use-toast";
-import { AppDispatch } from "@/store";
 import { userType } from "@/utils/types/user";
 import { toProperCase } from "@/utils/func/strUtils";
-import { generateUniqueId } from "@/utils/func/uniqueId";
 import { FullUserSchema } from "@/utils/zod-schema/user";
 import { formatZodErrors } from "@/utils/func/zodUtils";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useMemo, useState } from "react";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
 import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { MultiSelect } from "@/components/custom ui/multi-select";
@@ -23,7 +20,10 @@ import {
 import { Input, PasswordInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { createUser, generatePassword } from "./user-func";
+import { generatePassword } from "./user-func";
+import { useCreateUser } from "@/store/users";
+import { CustomAxiosError } from "@/utils/types/axios";
+import { useRoles } from "@/store/role";
 
 interface UserFormProps {
   open: boolean;
@@ -31,38 +31,39 @@ interface UserFormProps {
   initialValue?: userType | null;
 }
 
-const roles = [
-  { label: "Admin", value: "admin" },
-  { label: "Users", value: "user" },
-  { label: "Manager", value: "manager" },
-];
-
-export const UserForm = ({
-  open,
-  onOpenChange,
-  initialValue = null,
-}: UserFormProps) => {
+export const UserForm = ({ open, onOpenChange }: UserFormProps) => {
   // Hooks
-  const dispatch = useDispatch<AppDispatch>();
   const { toast } = useToast();
+  const createUserMutation = useCreateUser();
+  const { rolesArray } = useRoles();
+
+  const roles = useMemo(() => {
+    if (rolesArray.data) {
+      return rolesArray.data.map((role) => ({
+        label: role,
+        value: role,
+      }));
+    }
+    return [];
+  }, [rolesArray]);
 
   // use States
-  const [newUser, setNewUser] = useState<userType>(
-    initialValue ?? {
-      _id: "",
-      username: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      dob: undefined,
-      roles: [],
-      isLocked: false,
-    },
-  );
-
   const [isDefaultPass, setDefaultPass] = useState(false);
+  const [newUser, setNewUser] = useState<Omit<userType, "_id">>({
+    username: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    dob: undefined,
+    roles: [],
+    isLocked: false,
+    settings: {
+      isRegistered: true,
+      isPassChange: isDefaultPass,
+    },
+  });
 
   const handleInputChange = (
     field: keyof userType,
@@ -71,8 +72,7 @@ export const UserForm = ({
     setNewUser({ ...newUser, [field]: value });
   };
 
-  const handleCreateUser = () => {
-    const _id = generateUniqueId();
+  const handleCreateUser = async () => {
     const username = newUser.username.toLowerCase();
     const password = isDefaultPass ? generatePassword() : newUser.password;
     const firstName = newUser.firstName ? toProperCase(newUser.firstName) : "";
@@ -80,7 +80,6 @@ export const UserForm = ({
 
     const user = {
       ...newUser,
-      _id,
       username,
       password,
       firstName,
@@ -101,8 +100,28 @@ export const UserForm = ({
     }
 
     //Actual user creation logic goes here
-    createUser(user, dispatch);
-    onOpenChange(false);
+    try {
+      await createUserMutation.mutateAsync(user);
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      const Err = error as CustomAxiosError;
+      if (Err.response?.data.error) {
+        toast({
+          title: "Error occured",
+          description: `Failed to create user. ${Err.response?.data.error}`,
+          variant: "destructive",
+        });
+      } else
+        toast({
+          title: "Error occured",
+          description: "Failed to create user. Please try again.",
+          variant: "destructive",
+        });
+    }
   };
 
   const handleDateClick = (date: Date) => {
@@ -113,7 +132,7 @@ export const UserForm = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[90vw] px-2">
         <DialogHeader>
-          <DialogTitle>User registration form</DialogTitle>
+          <DialogTitle className="px-4">User registration form</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex flex-col gap-2 h-[450px] xl:h-auto xl:max-h-[80svh] px-4">
           <div className="flex gap-4 flex-col mb-6">
@@ -194,7 +213,7 @@ export const UserForm = ({
                   }
                   autoComplete="new-password"
                   disabled={isDefaultPass}
-                  value={isDefaultPass ? "" : newUser.password || ""}
+                  value={isDefaultPass ? "" : newUser.password}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }

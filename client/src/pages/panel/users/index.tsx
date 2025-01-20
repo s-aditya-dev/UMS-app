@@ -1,21 +1,69 @@
-import { Loader } from "@/components/custom ui/loader";
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import { ErrorDisplay } from "@/components/custom ui/error-display";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { useDebounce } from "@/hooks/use-debounce";
 import { UserTable } from "@/pages/panel/users/user-table";
-import useUserStore, { useUsers } from "@/store/zustand/users";
-import { useEffect, useState } from "react";
+import useUserStore, { useUsers } from "@/store/users";
+import { CustomAxiosError } from "@/utils/types/axios";
+import { useCallback, useEffect, useState } from "react";
 import { UserFooter } from "./user-footer";
 import { UserHeader } from "./user-header";
-import { CustomAxiosError } from "@/utils/types/axios";
+import { UserSkeleton } from "./user-skeleton";
 
 export const UserList = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const { setBreadcrumbs } = useBreadcrumb();
+  const {
+    currentPage,
+    itemsPerPage,
+    searchQuery,
+    setSearchQuery,
+    setCurrentPage,
+    selectedRole,
+    setSelectedRole,
+  } = useUserStore();
 
-  const { currentPage, itemsPerPage, setCurrentPage } = useUserStore();
+  // Local state for input value
+  const [searchTerm, setSearchTerm] = useState(searchQuery);
+  const [isFiltered, setIsFiltered] = useState(false);
+
+  // Debounced function to update store and trigger API call
+  const debouncedSetSearch = useDebounce((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, 600);
+
+  // Handle input change
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchTerm(value); // Update local state immediately
+      debouncedSetSearch(value); // Debounce the store update
+      setIsFiltered(true);
+      if (value === "" && !selectedRole) setIsFiltered(false);
+    },
+    [debouncedSetSearch, selectedRole],
+  );
+
+  const handleRoleChange = useCallback(
+    (value: string) => {
+      setSelectedRole(value);
+      setCurrentPage(1);
+      setIsFiltered(true);
+    },
+    [setSelectedRole, setCurrentPage, setIsFiltered],
+  );
+
+  const handleClearFilter = useCallback(() => {
+    setSearchTerm("");
+    debouncedSetSearch("");
+    setSelectedRole(null);
+    setIsFiltered(false);
+  }, [setSearchTerm, debouncedSetSearch, setSelectedRole, setIsFiltered]);
+
   const { data, isLoading, error } = useUsers({
     page: currentPage,
     limit: itemsPerPage,
-    role: undefined,
+    role: selectedRole || undefined,
+    search: searchQuery, // This uses the debounced value from store
   });
 
   const paginationData = data && {
@@ -25,57 +73,64 @@ export const UserList = () => {
   };
 
   const navigation = {
-    navigateToNextPage: () => {
-      setCurrentPage(currentPage + 1);
-    },
-    navigateToPreviousPage: () => {
-      setCurrentPage(currentPage - 1);
-    },
-    navigateToNthPage: (nthPageNumber: number) => {
-      setCurrentPage(nthPageNumber);
-    },
+    currentPage: data?.currentPage || 0,
+    totalPages: data?.totalPages || 0,
+    onNext: () => setCurrentPage(currentPage + 1),
+    onPrevious: () => setCurrentPage(currentPage - 1),
+    onPageChange: (nthPageNumber: number) => setCurrentPage(nthPageNumber),
   };
 
-  const handleSearchChange = (term: string) => {
-    setSearchTerm(term);
-    navigation.navigateToNthPage(1);
+  const filter = {
+    searchTerm: searchTerm,
+    onSearchChange: handleSearchChange,
+    selectedRole: selectedRole || "",
+    onRoleChange: handleRoleChange,
+    isFiltered: isFiltered,
+    onClearFilter: handleClearFilter,
   };
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Users" }]);
-  }, []);
+  }, [setBreadcrumbs]);
 
   if (isLoading) {
     return (
-      <div className=" h-[60svh] w-full flex justify-center items-center flex-col gap-2">
-        <Loader />
-      </div>
+      <UserSkeleton />
+      // <CenterWrapper>
+      // </CenterWrapper>
     );
   }
 
-  const e = error as CustomAxiosError;
   if (error) {
-    console.log(error);
-    return <div>Error occurred: {e.response?.data.error}</div>;
+    const { response, message } = error as CustomAxiosError;
+    let errMsg = response?.data.error ?? message;
+    let needLogin = false;
+    if (errMsg === "Access denied. No token provided") {
+      errMsg = "Access denied. No token provided please login again";
+      needLogin = true;
+    }
+    return (
+      <CenterWrapper className="px-2 gap-2 text-center">
+        <ErrorDisplay errMsg={errMsg} isLoginRequired={needLogin} />
+      </CenterWrapper>
+    );
   }
 
   return (
     <div className="w-full flex items-center flex-col gap-2">
       <UserHeader
-        nthClick={navigation.navigateToNthPage}
-        prevClick={navigation.navigateToPreviousPage}
-        nextClick={navigation.navigateToNextPage}
-        currPage={data?.currentPage}
-        nPage={data?.totalPages}
-        searchTerm={searchTerm}
-        setSearchTerm={handleSearchChange}
-        recordLabel={paginationData?.recordCounter || ""}
+        filter={filter}
+        pagination={navigation}
+        recordInfo={paginationData || {}}
       />
       <UserTable
         userList={data?.users || []}
-        firstIndex={paginationData?.firstIndex || 1}
+        firstIndex={paginationData?.firstIndex}
       />
-      <UserFooter currPage={data?.currentPage} npages={data?.totalPages} />
+      <UserFooter
+        currPage={data?.currentPage || 0}
+        npages={data?.totalPages || 0}
+      />
     </div>
   );
 };
