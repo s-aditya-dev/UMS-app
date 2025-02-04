@@ -1,5 +1,10 @@
 import { Card } from "@/components/ui/card";
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
   Table,
   TableBody,
   TableCell,
@@ -7,14 +12,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getHighestPrecedenceRole } from "@/hooks/use-role";
 import { UserAction } from "@/pages/panel/users/user-actions";
-import { userType } from "@/utils/types/user";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import { useState } from "react";
+import { useAuth } from "@/store/auth";
+import { useRoles } from "@/store/role";
+import { userType } from "@/store/users";
 
 interface UserTableProps {
   userList: userType[];
@@ -22,10 +24,21 @@ interface UserTableProps {
 }
 
 export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
-  const [showPass, setShowPass] = useState<string>("");
+  const { rolesQuery } = useRoles();
+  const { combinedRole } = useAuth(false);
 
-  const handleShowPassword = (uid: string) => {
-    setShowPass((prev) => (prev === uid ? "" : uid));
+  const shouldDisableAction = (userRoles: string[]) => {
+    if (!rolesQuery.data || !combinedRole?.highestPrecedence) {
+      return true; // Disable if we don't have role data yet
+    }
+
+    const targetUserRole = getHighestPrecedenceRole(userRoles, rolesQuery.data);
+    if (!targetUserRole) {
+      return true; // Disable if we can't determine the user's role
+    }
+
+    // Disable if target user's role precedence is >= current user's precedence
+    return targetUserRole.precedence <= combinedRole.highestPrecedence;
   };
 
   return (
@@ -36,7 +49,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
             <TableHead>#</TableHead>
             <TableHead className="whitespace-nowrap">Employee Name</TableHead>
             <TableHead>Username</TableHead>
-            <TableHead>Password</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Account</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Action</TableHead>
@@ -57,13 +70,16 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                   {user.firstName + " " + user.lastName}
                 </TableCell>
                 <TableCell>{user.username}</TableCell>
-                <TableCell>
-                  {showPass === user._id ? user.password : "••••••••"}
-                </TableCell>
+                <TableCell>{user.email || "N/A"}</TableCell>
                 <TableCell>{user.isLocked ? "Locked" : "Unlocked"}</TableCell>
                 <TableCell className="cursor-default">
                   <HoverCard>
-                    <HoverCardTrigger>{user.roles[0]}</HoverCardTrigger>
+                    <HoverCardTrigger>
+                      {rolesQuery.data
+                        ? getHighestPrecedenceRole(user.roles, rolesQuery.data)
+                            ?.name
+                        : user.roles[0]}
+                    </HoverCardTrigger>
                     <HoverCardContent className="w-auto">
                       <div className="text-sm font-semibold">
                         Roles assigned : {user.roles.join(", ")}
@@ -74,8 +90,7 @@ export const UserTable = ({ userList, firstIndex }: UserTableProps) => {
                 <TableCell>
                   <UserAction
                     user={user}
-                    showPass={showPass}
-                    handleShowPass={handleShowPassword}
+                    isDisabled={shouldDisableAction(user.roles)}
                   />
                 </TableCell>
               </TableRow>

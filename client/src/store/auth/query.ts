@@ -1,44 +1,36 @@
-import { create } from "zustand";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { userType } from "@/utils/types/user";
+import { userType } from "@/store/users";
 import newRequest from "@/utils/func/request";
 import { CustomAxiosError } from "@/utils/types/axios";
-
-interface LoginData {
-  loginId: string;
-  password: string;
-}
-
-interface AuthStore {
-  user: userType | null;
-  setUser: (user: userType | null) => void;
-}
-
-export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-}));
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { roleApi } from "@/store/role";
+import { LoginData } from "./type";
+import { useAuthStore } from "./store";
 
 export const useAuth = (enabled = false) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { setUser } = useAuthStore();
+  const { setUser, setCombinedRole } = useAuthStore();
 
   const login = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const response = await newRequest.post("/auth/login", credentials);
-      return response.data.data;
+      return response.data.data as userType;
     },
-    onSuccess: (userData) => {
-      if (userData.settings.isPassChange) {
+    onSuccess: async (userData) => {
+      // Fetch combined role after user data
+      const combinedRole = await roleApi.getCombinedRole(userData.roles);
+
+      // Setting current user and combined role
+      setUser(userData);
+      setCombinedRole(combinedRole);
+
+      if (userData.settings?.isPassChange) {
         navigate(`/auth/change-password/${userData._id}`);
-      } else if (!userData.settings.isRegistered) {
+      } else if (!userData.settings?.isRegistered) {
         navigate(`/auth/register-user/${userData._id}`);
-      } else if (userData.isLocked) {
-        navigate("/auth/locked");
       } else {
-        navigate("/panel/dashboard");
+        navigate("/panel/");
         setUser(userData);
       }
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
@@ -67,10 +59,16 @@ export const useAuth = (enabled = false) => {
     queryKey: ["current-user"],
     queryFn: async () => {
       const response = await newRequest.post("/auth/current-user");
-      // Extract the user data from the nested response
       const userData = response.data.data;
+
+      // Fetch combined role after user data
+      const combinedRole = await roleApi.getCombinedRole(userData.roles);
+
+      // Setting current user and combined role
       setUser(userData);
-      return userData; // Return just the user data
+      setCombinedRole(combinedRole);
+
+      return userData;
     },
     enabled,
     retry: false,
@@ -83,8 +81,9 @@ export const useAuth = (enabled = false) => {
     isLoading,
     login: login.mutate,
     logout: logout.mutate,
-    checkUser: refetch, // Expose refetch function to manually check user
+    checkUser: refetch,
     isLoggingIn: login.isPending,
     loginError: login.error as CustomAxiosError | null,
+    combinedRole: useAuthStore((state) => state.combinedRole), // Expose combinedRole
   };
 };

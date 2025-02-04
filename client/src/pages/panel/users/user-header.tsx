@@ -14,6 +14,9 @@ import { toProperCase } from "@/utils/func/strUtils";
 import { Tooltip } from "@/components/custom ui/tooltip-provider";
 import { FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RoleArrayType, useRoles } from "@/store/role";
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role.ts";
 
 interface PaginationProps {
   currentPage: number;
@@ -65,7 +68,7 @@ export const UserHeader = ({
 };
 
 const Filter = (props: { filter: FilterProps }) => {
-  const roles = ["admin", "user", "manager"];
+  const { rolesArray: roles } = useRoles();
   const {
     searchTerm,
     onSearchChange,
@@ -74,6 +77,10 @@ const Filter = (props: { filter: FilterProps }) => {
     isFiltered,
     onClearFilter,
   } = props.filter;
+
+  const { combinedRole } = useAuth(false);
+  const showUserAddButton = hasPermission(combinedRole, "Users", "create-user");
+
   return (
     <div className="flex gap-2">
       <Input
@@ -89,13 +96,14 @@ const Filter = (props: { filter: FilterProps }) => {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>Roles</SelectLabel>
-            {roles.map((role) => {
-              return (
-                <SelectItem value={role} key={role}>
-                  {toProperCase(role)}
-                </SelectItem>
-              );
-            })}
+            {roles.data &&
+              roles.data.map((role: RoleArrayType) => {
+                return (
+                  <SelectItem value={role.name} key={role._id}>
+                    {toProperCase(role.name)}
+                  </SelectItem>
+                );
+              })}
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -113,7 +121,7 @@ const Filter = (props: { filter: FilterProps }) => {
         </Tooltip>
       )}
 
-      <UserAddButton />
+      {showUserAddButton && <UserAddButton />}
     </div>
   );
 };

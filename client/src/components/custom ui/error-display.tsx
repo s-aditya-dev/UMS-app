@@ -1,43 +1,48 @@
-import { ArrowRight, CircleAlert } from "lucide-react";
-import { ReactNode } from "react";
-import { Button } from "../ui/button";
-import { useAuth } from "@/store/auth";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { XCircle } from "lucide-react";
 
-interface ErrorDisplayProp {
-  errTitle?: string;
-  errMsg: string;
-  isLoginRequired?: boolean;
-  children?: ReactNode | null;
+interface ErrorCardProps {
+  title: string;
+  description: string;
+  btnTitle: string;
+  onAction: () => void;
+  className?: string;
 }
-export const ErrorDisplay = ({
-  errTitle,
-  errMsg,
-  isLoginRequired = false,
-  children = null,
-}: ErrorDisplayProp) => {
-  const { logout: handleLogout } = useAuth();
-  // const handleLogout = useHandleLogout();
+
+const ErrorCard = ({
+  title = "Something went wrong",
+  description = "There was an error loading this content.",
+  btnTitle,
+  onAction,
+  className = "",
+}: ErrorCardProps) => {
   return (
-    <>
-      <div className="bg-destructive p-3 mb-2 rounded-full">
-        <CircleAlert size={96} />
-      </div>
-      <div className="font-semibold">
-        {errTitle ? errTitle : "Error occurred:"}
-      </div>
-      {errMsg}
-      {isLoginRequired && (
-        <Button
-          className="font-semibold my-3"
-          variant="expandIcon"
-          Icon={<ArrowRight className="translate-x-[-5px]" size={16} />}
-          iconPlacement="right"
-          onClick={handleLogout}
-        >
-          Go to login
+    <Card className={`w-full max-w-md ${className}`}>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <XCircle className="h-6 w-6 text-destructive" />
+          <CardTitle className="text-destructive">{title}</CardTitle>
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+
+      <CardFooter className="flex justify-end gap-2">
+        <Button variant="secondary" onClick={onAction}>
+          {btnTitle}
         </Button>
-      )}
-      {children && children}
-    </>
+      </CardFooter>
+    </Card>
   );
 };
+
+export default ErrorCard;

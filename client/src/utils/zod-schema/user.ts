@@ -17,7 +17,8 @@ const BaseUserSchema = z.object({
     .max(12)
     .regex(/^[a-zA-Z0-9]*$/, {
       message: "Password can only contain only alphabets and numbers.",
-    }),
+    })
+    .optional(),
   firstName: z
     .string()
     .min(2)
@@ -38,6 +39,21 @@ const BaseUserSchema = z.object({
   dob: z.date().optional(),
   roles: z.array(z.string()).min(1),
   isLocked: z.boolean(),
+});
+
+export const RegisterUserSchema = BaseUserSchema.pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+  dob: true,
+  _id: true,
+}).extend({
+  email: z.string().email(),
+  phone: z
+    .string()
+    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }),
+  dob: z.date(),
 });
 
 // Full User Schema (All fields required)

@@ -20,6 +20,8 @@ import { RoleType } from "@/store/role";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { RoleForm } from "./role-form";
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role";
 
 interface MoveEvent {
   activeIndex: number;
@@ -61,6 +63,22 @@ export function RoleSortable({
     useState<SortableRole[]>(sortableRoles);
   const [hasChanges, setHasChanges] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { combinedRole } = useAuth(false);
+
+  const showAddButton = hasPermission(combinedRole, "Settings", "create-role");
+  const showEditButton =
+    hasPermission(combinedRole, "Settings", "update-role") ||
+    hasPermission(combinedRole, "Settings", "read-role");
+  const showDeleteButton = hasPermission(
+    combinedRole,
+    "Settings",
+    "delete-role",
+  );
+  const showDragButton = hasPermission(
+    combinedRole,
+    "Settings",
+    "change-precedence",
+  );
 
   const deleteDialog = useAlertDialog({
     iconName: "Trash2",
@@ -176,6 +194,16 @@ export function RoleSortable({
     });
   };
 
+  function getDynamicGridColumns() {
+    const buttons = [
+      showDragButton && "auto",
+      showEditButton && "auto",
+      showDeleteButton && "auto",
+    ].filter(Boolean);
+
+    return `grid-cols-[1fr,${buttons.join(",")}]`;
+  }
+
   return (
     <Card className="w-full h-[80svh] md:h-full md:max-w-sm flex flex-col">
       <CardHeader className="w-full flex-col gap-4 space-y-0 sm:flex-row">
@@ -188,15 +216,17 @@ export function RoleSortable({
           </CardDescription>
         </div>
         <RoleForm isOpen={isFormOpen} setIsOpen={setIsFormOpen} />
-        <Button
-          onClick={() => setIsFormOpen(true)}
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-fit"
-        >
-          Add Role
-        </Button>
+        {showAddButton && (
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-fit"
+          >
+            Add Role
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="flex-grow min-h-0 p-2">
         <ScrollArea className="h-full px-4">
@@ -204,11 +234,19 @@ export function RoleSortable({
             value={localSortableRoles}
             onMove={handleMove}
             overlay={
-              <div className="grid grid-cols-[1fr,auto,auto,auto] items-center gap-2">
+              <div
+                className={`grid ${getDynamicGridColumns()} items-center gap-2`}
+              >
                 <div className="h-8 w-full rounded-sm bg-primary/10" />
-                <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-                <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
-                <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                {showDragButton && (
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                )}
+                {showEditButton && (
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                )}
+                {showDeleteButton && (
+                  <div className="size-8 shrink-0 rounded-sm bg-primary/10" />
+                )}
               </div>
             }
           >
@@ -219,48 +257,56 @@ export function RoleSortable({
                   value={sortableRole.id}
                   asChild
                 >
-                  <div className="grid grid-cols-[1fr,auto,auto,auto] items-center gap-2">
+                  <div
+                    className={`grid ${getDynamicGridColumns()} items-center gap-2`}
+                  >
                     <Input
                       className="h-8"
                       value={sortableRole.role.name}
                       onChange={(e) => handleInputChange(index, e.target.value)}
                       disabled
                     />
-                    <SortableDragHandle
-                      variant="outline"
-                      size="icon"
-                      className="size-8 shrink-0"
-                      disabled={hasRoleAccess(index)}
-                    >
-                      <GripVertical className="size-4" aria-hidden="true" />
-                    </SortableDragHandle>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="size-8 shrink-0"
-                      onClick={() => handleView(sortableRole.role)}
-                      disabled={index < currentRole.precedence - 1}
-                    >
-                      <Bolt className="size-4" aria-hidden="true" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="size-8 shrink-0"
-                      disabled={hasRoleAccess(index)}
-                      onClick={() =>
-                        handleDelete(sortableRole.id, sortableRole)
-                      }
-                    >
-                      <Trash
-                        className="size-4 text-destructive"
-                        aria-hidden="true"
-                      />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+                    {showDragButton && (
+                      <SortableDragHandle
+                        variant="outline"
+                        size="icon"
+                        className="size-8 shrink-0"
+                        disabled={hasRoleAccess(index)}
+                      >
+                        <GripVertical className="size-4" aria-hidden="true" />
+                      </SortableDragHandle>
+                    )}
+                    {showEditButton && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-8 shrink-0"
+                        onClick={() => handleView(sortableRole.role)}
+                        disabled={index < currentRole.precedence - 1}
+                      >
+                        <Bolt className="size-4" aria-hidden="true" />
+                        <span className="sr-only">View</span>
+                      </Button>
+                    )}
+                    {showDeleteButton && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-8 shrink-0"
+                        disabled={hasRoleAccess(index)}
+                        onClick={() =>
+                          handleDelete(sortableRole.id, sortableRole)
+                        }
+                      >
+                        <Trash
+                          className="size-4 text-destructive"
+                          aria-hidden="true"
+                        />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    )}
                   </div>
                 </SortableItem>
               ))}

@@ -1,8 +1,9 @@
 import styles from "@/scss/layout/SettingsLayout.module.scss";
 import { RoleType, useRoleStore, useRoles } from "@/store/role";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { EmptyRoleSettings, RoleSettings } from "./role-settings";
 import { RoleSortable } from "./role-sortable";
+import { useAuth } from "@/store/auth";
 
 export const Role = () => {
   const { selectedRole, setSelectedRole } = useRoleStore();
@@ -13,8 +14,12 @@ export const Role = () => {
     updatePrecedencesMutation,
   } = useRoles();
 
-  const roles = rolesQuery.data || [];
-  const currentRole = roles[0]; // Assuming first role is current
+  const { combinedRole } = useAuth(false);
+
+  const [roles, setRoles] = useState(rolesQuery.data || []);
+  const currentRole = roles.find(
+    (role) => role.name === combinedRole?.highestRole,
+  );
 
   // Set initial selected role in useEffect
   useEffect(() => {
@@ -22,6 +27,12 @@ export const Role = () => {
       setSelectedRole(currentRole);
     }
   }, [currentRole, selectedRole, setSelectedRole]);
+
+  useEffect(() => {
+    if (rolesQuery.data) {
+      setRoles(rolesQuery.data);
+    }
+  }, [rolesQuery]);
 
   // Handle loading and error states
   if (rolesQuery.isLoading) {
@@ -69,7 +80,7 @@ export const Role = () => {
     >
       <RoleSortable
         roles={roles}
-        currentRole={currentRole}
+        currentRole={currentRole!}
         onDelete={handleDelete}
         onView={handleView}
         onRolesChange={onPrecedenceChange}

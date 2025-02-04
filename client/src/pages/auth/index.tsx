@@ -11,7 +11,6 @@ const Auth = () => {
   return (
     <Routes location={location}>
       <Route path="/login" element={<LoginForm />} />
-      <Route path="/locked" element={<h1>Locked User</h1>} />
       <Route path="/register-user/:id" element={<RegisterForm />} />
       <Route path="/change-password/:id" element={<ChangePass />} />
       <Route path="/*" element={<LoginForm />} />

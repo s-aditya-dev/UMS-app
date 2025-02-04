@@ -129,6 +129,77 @@ class RoleController {
     }
   }
 
+  // Get Roles Array
+  async getRolesArray(req: Request, res: Response, next: NextFunction) {
+    try {
+      const roles = await Role.find({})
+        .sort({ precedence: 1 })
+        .select("_id name precedence");
+
+      res.status(200).json({ roles });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Error fetching roles array",
+        ),
+      );
+    }
+  }
+
+  // Get combine roles
+  async getCombinedRole(req: Request, res: Response, next: NextFunction) {
+    try {
+      const roleNames = req.body.roles;
+      if (!Array.isArray(roleNames) || roleNames.length === 0) {
+        return next(createError(400, "Please provide an array of role names"));
+      }
+
+      const roles = await Role.find({ name: { $in: roleNames } });
+      if (roles.length === 0) {
+        return next(createError(404, "No roles found"));
+      }
+
+      const combinedPermissions: Map<string, Set<string>> = new Map();
+
+      const highestPrecedenceRole = roles.reduce((prev, current) =>
+        prev.precedence < current.precedence ? prev : current,
+      );
+
+      roles.forEach((role) => {
+        role.permissions.forEach((permission) => {
+          if (!combinedPermissions.has(permission.page)) {
+            combinedPermissions.set(permission.page, new Set());
+          }
+          permission.actions.forEach((action) => {
+            combinedPermissions.get(permission.page)?.add(action);
+          });
+        });
+      });
+
+      const formattedPermissions = Array.from(combinedPermissions).map(
+        ([page, actions]) => ({
+          page,
+          actions: Array.from(actions),
+        }),
+      );
+
+      res.status(200).json({
+        highestRole: highestPrecedenceRole.name,
+        highestPrecedence: highestPrecedenceRole.precedence,
+        roles: roleNames,
+        permissions: formattedPermissions,
+      });
+    } catch (error) {
+      next(
+        createError(
+          500,
+          error instanceof Error ? error.message : "Error combining roles",
+        ),
+      );
+    }
+  }
+
   // Optional: Add method to fix gaps in precedence if needed
   async reorderPrecedence(req: Request, res: Response, next: NextFunction) {
     try {

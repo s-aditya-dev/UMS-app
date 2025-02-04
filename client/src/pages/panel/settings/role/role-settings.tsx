@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { RoleType } from "@/store/role";
 import { isEqual } from "lodash";
 import { useAlertDialog } from "@/components/custom ui/alertDialog";
+import { useAuth } from "@/store/auth";
+import { hasPermission } from "@/hooks/use-role";
 
 interface RoleSettingsProp {
   role: RoleType;
@@ -26,6 +28,8 @@ export const RoleSettings = ({
 }: RoleSettingsProp) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [role, setRole] = useState(initRole);
+  const { combinedRole } = useAuth(false);
+  const isEditable = hasPermission(combinedRole, "Settings", "update-role");
   const [savedPermissions, setSavedPermissions] = useState(
     initRole.permissions,
   );
@@ -76,7 +80,7 @@ export const RoleSettings = ({
         scrollContainer.scrollTop = 0;
       }
     }
-  }, [role]);
+  }, [role.name]);
 
   return (
     <>
@@ -93,6 +97,11 @@ export const RoleSettings = ({
             <RolePermissions
               initialPermissions={role.permissions}
               onPermissionsChange={handleSetPermissions}
+              isEditable={
+                isEditable && combinedRole?.highestPrecedence
+                  ? role.precedence > combinedRole?.highestPrecedence
+                  : false
+              }
             />
           </CardContent>
           <CardFooter>

@@ -16,16 +16,19 @@ interface PermissionPageProps {
   actions: PermissionAction[];
   defaultSelectedActions: string[];
   onActionsChange: (pageId: string, selectedActions: string[]) => void;
+  isEditable: boolean;
 }
 
 interface RolePermissionsProp {
   initialPermissions: Permission[];
   onPermissionsChange: (permissions: Permission[]) => void;
+  isEditable: boolean;
 }
 
 export const RolePermissions = ({
   initialPermissions,
   onPermissionsChange,
+  isEditable,
 }: RolePermissionsProp) => {
   // use States
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(
@@ -69,6 +72,7 @@ export const RolePermissions = ({
               ?.actions || []
           }
           onActionsChange={handlePermissionChange}
+          isEditable={isEditable}
         />
       ))}
     </div>
@@ -81,11 +85,11 @@ const PermissionPageSection = ({
   actions,
   defaultSelectedActions,
   onActionsChange,
+  isEditable,
 }: PermissionPageProps) => {
   const [selectedActions, setSelectedActions] = useState<string[]>(
     defaultSelectedActions,
   );
-  const isEditable = true;
 
   useEffect(() => {
     setSelectedActions(defaultSelectedActions);

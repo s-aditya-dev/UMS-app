@@ -7,8 +7,16 @@ import {
 } from "@/components/ui/tooltip";
 
 export const Tooltip = forwardRef(function Tooltip(
-  { content, children, side = "top" }: { content: string; children: React.ReactNode; side?: "top" | "right" | "bottom" | "left" },
-  ref: Ref<HTMLButtonElement>
+  {
+    content,
+    children,
+    side = "top",
+  }: {
+    content: string;
+    children: React.ReactNode;
+    side?: "top" | "right" | "bottom" | "left";
+  },
+  ref: Ref<HTMLButtonElement>,
 ) {
   return (
     <TooltipProvider>

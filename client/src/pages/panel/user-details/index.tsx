@@ -1,5 +1,3 @@
-// UserDetails.tsx
-import { useAlertDialog } from "@/components/custom ui/alertDialog";
 import { CenterWrapper } from "@/components/custom ui/center-page";
 import { Loader } from "@/components/custom ui/loader";
 import {
@@ -11,20 +9,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
-import { useToast } from "@/hooks/use-toast";
-import useUserStore, {
-  useDeleteUser,
-  useUpdateUser,
-  useUser,
-} from "@/store/users";
-import { formatZodErrors } from "@/utils/func/zodUtils";
-import { userType } from "@/utils/types/user";
-import { FullUserSchema } from "@/utils/zod-schema/user";
-import isEqual from "lodash/isEqual";
+import useUserStore, { useUser } from "@/store/users";
+import { userType } from "@/store/users";
+import { isEqual } from "lodash";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { NameForm, PersonalInfoForm, RolesForm } from "./user-form";
+import { useParams } from "react-router-dom";
+import {
+  NameForm,
+  PersonalInfoForm,
+  RolesForm,
+  UsernameForm,
+} from "./user-form";
 import { UserActionButtons } from "./user-action-btns";
+import { useAuth } from "@/store/auth";
+import CredentialsModal from "@/components/custom ui/credentials-modal";
+import { useUserDialogs } from "./user-dialog-hook";
+import { CustomAxiosError } from "@/utils/types/axios";
+import ErrorCard from "@/components/custom ui/error-display";
 
 const INITIAL_USER_STATE: Partial<userType> = {
   firstName: "",
@@ -33,53 +34,56 @@ const INITIAL_USER_STATE: Partial<userType> = {
   email: "",
   phone: "",
   roles: [],
-  dob: new Date(),
-  settings: {
-    isRegistered: true,
-    isPassChange: false,
-  },
+  dob: undefined,
+  settings: { isRegistered: true, isPassChange: false },
 };
 
-export function UserDetails() {
-  const navigate = useNavigate();
+function UserDetails() {
   const { selectedUserId } = useUserStore();
   const { setBreadcrumbs } = useBreadcrumb();
-  const { id } = useParams();
-  const { toast } = useToast();
+  const { id } = useParams<{ id: string }>();
+  const { user: currentUser, logout: handleLogout } = useAuth();
   const userId = selectedUserId || id;
+
   const { data: user, isLoading, error } = useUser(userId!);
-  const updateUser = useUpdateUser();
-  const deleteUser = useDeleteUser();
-
-  const updateDialog = useAlertDialog({
-    iconName: "Save",
-    alertType: "Success",
-    title: "Update User",
-    description: `Are you sure you want to update this user?`,
-    actionLabel: "Update",
-    cancelLabel: "Cancel",
-  });
-
-  const deleteDialog = useAlertDialog({
-    iconName: "Trash2",
-    alertType: "Danger",
-    title: "Delete User",
-    description: `Are you sure you want to delete this user?`,
-    actionLabel: "Delete",
-    cancelLabel: "Cancel",
-  });
-
   const [isEditable, setEditable] = useState(false);
-  const [userData, setUserData] = useState(INITIAL_USER_STATE);
-  const [originalData, setOriginalData] = useState(INITIAL_USER_STATE);
+  const [isCredentialsOpen, setIsCredentialsOpen] = useState(false);
+  const [tempPass, setTempPass] = useState("");
+  const [userData, setUserData] =
+    useState<Partial<userType>>(INITIAL_USER_STATE);
+  const [originalData, setOriginalData] =
+    useState<Partial<userType>>(INITIAL_USER_STATE);
+
+  const hasChanges = useCallback(() => {
+    return !isEqual(userData, originalData);
+  }, [userData, originalData]);
+
+  const {
+    dialog,
+    handleUpdate,
+    handleDelete,
+    handleResetPassword,
+    handleLock,
+  } = useUserDialogs({
+    userId: userId!,
+    userData,
+    originalData,
+    username: user?.username || "",
+    currentUserId: currentUser?._id,
+    isEditable,
+    setEditable,
+    setUserData,
+    setTempPass,
+    setIsCredentialsOpen,
+    hasChanges,
+  });
 
   useEffect(() => {
     if (user) {
-      console.log(user);
       const formattedUser = {
         ...INITIAL_USER_STATE,
         ...user,
-        dob: user.dob ? new Date(user.dob) : new Date(),
+        dob: user.dob ? new Date(user.dob) : undefined,
       };
       setUserData(formattedUser);
       setOriginalData(formattedUser);
@@ -88,124 +92,94 @@ export function UserDetails() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { to: `/panel/users/`, label: "Users" },
+      { to: "/panel/users/", label: "Users" },
       { label: "Details" },
     ]);
   }, [setBreadcrumbs]);
 
-  const hasChanges = useCallback(() => {
-    return !isEqual(userData, originalData);
-  }, [userData, originalData]);
+  if (!userId || error) {
+    const { response, message } = error as CustomAxiosError;
+    let errMsg = response?.data.error ?? message;
 
-  const handleUpdate = async () => {
-    if (isEditable) {
-      if (!hasChanges()) {
-        setEditable(false);
-        return;
-      }
+    if (errMsg === "Access denied. No token provided")
+      errMsg = "Access denied. No token provided please login again";
 
-      const validation = FullUserSchema.safeParse(userData);
+    if (errMsg === "Network Error")
+      errMsg =
+        "Connection issue detected. Please check your internet or try again later.";
 
-      if (!validation.success) {
-        const errorMessages = formatZodErrors(validation.error.errors);
-        toast({
-          title: "Form Validation Error",
-          description: `Please correct the following errors:\n${errorMessages}`,
-          variant: "warning",
-        });
-        return;
-      }
+    return (
+      <CenterWrapper className="px-2 gap-2 text-center">
+        <ErrorCard
+          title="Error occured"
+          description={errMsg}
+          btnTitle="Go to Login"
+          onAction={handleLogout}
+        />
+      </CenterWrapper>
+    );
+  }
 
-      if (userId) {
-        updateDialog.show({
-          config: {
-            description: `Are you sure you want to update ${user?.username}?`,
-          },
-          onAction: async () => {
-            await updateUser.mutate({ userId, updates: userData });
-            setOriginalData(userData);
-            setEditable(false);
-          },
-          onCancel: () => {
-            setUserData(originalData);
-            setEditable(false);
-          },
-        });
-      }
-    } else {
-      setEditable(true);
-    }
-  };
-
-  const handleDelete = () => {
-    if (userId) {
-      deleteDialog.show({
-        config: {
-          description: `Are you sure you want to delete ${user?.username}?`,
-        },
-        onAction: async () => {
-          await deleteUser.mutate(userId);
-          navigate("/panel/users");
-        },
-      });
-    }
-  };
-
-  const handleResetPassword = () => {
-    // Implement password reset logic
-    console.log("Reset password clicked");
-  };
-
-  const handleInputChange = (
-    field: keyof typeof userData,
-    value: string | string[] | Date,
-  ) => {
-    setUserData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  if (!userId) return <div>User not found</div>;
-  if (isLoading) return <Loader />;
-  if (error) return <div>Error: {error?.message}</div>;
+  if (isLoading)
+    return (
+      <CenterWrapper>
+        <Loader />
+      </CenterWrapper>
+    );
 
   return (
-    <CenterWrapper>
+    <>
       <Card className="my-10 w-[90%] md:w-full max-w-md">
         <CardHeader>
           <CardTitle>User Details</CardTitle>
           <CardDescription>
-            Information about user: {user.username}
+            Information about user: {user?.username}
           </CardDescription>
         </CardHeader>
-
         <CardContent className="flex gap-4 flex-col">
           <NameForm
             userData={userData}
             isEditable={isEditable}
-            onInputChange={handleInputChange}
+            onInputChange={(field, value) =>
+              setUserData((prev) => ({ ...prev, [field]: value }))
+            }
           />
           <PersonalInfoForm
             userData={userData}
             isEditable={isEditable}
-            onInputChange={handleInputChange}
+            onInputChange={(field, value) =>
+              setUserData((prev) => ({ ...prev, [field]: value }))
+            }
           />
+          <UsernameForm userData={userData} />
           <RolesForm
             userData={userData}
             isEditable={isEditable}
-            onInputChange={handleInputChange}
+            onInputChange={(field, value) =>
+              setUserData((prev) => ({ ...prev, [field]: value }))
+            }
           />
         </CardContent>
-
         <CardFooter>
           <UserActionButtons
             isEditable={isEditable}
+            userData={userData}
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             onResetPassword={handleResetPassword}
+            onLockUser={handleLock}
           />
         </CardFooter>
       </Card>
-      <updateDialog.AlertDialog />
-      <deleteDialog.AlertDialog />
-    </CenterWrapper>
+      <dialog.AlertDialog />
+      <CredentialsModal
+        open={isCredentialsOpen}
+        onOpenChange={setIsCredentialsOpen}
+        username={userData.username || "N/A"}
+        password={tempPass || "N/A"}
+      />
+    </>
   );
 }
+
+export default UserDetails;

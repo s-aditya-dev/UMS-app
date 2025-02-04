@@ -1,5 +1,5 @@
 import { BreadcrumbProvider } from "@/context/BreadcrumbContext";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../../scss/layout/AppLayout.module.scss";
 
 // Panel Components
@@ -7,22 +7,33 @@ import { MainBody } from "./modules/main";
 import { Nav } from "./modules/nav";
 import { Sidebar } from "./modules/sidebar";
 
-import { NavLinks } from "@/store/data/side-links";
-// import { useHandleLogout } from "@/hooks/use-logout.ts";
 import { useAuth } from "@/store/auth";
+import { NavLinks } from "@/store/data/side-links";
 
 export const Panel = () => {
   // useStates
-  const [currPage, setPage] = useState("Dashboard");
+  const [currPage, setPage] = useState("");
 
   //Hooks
-  const { logout: handleLogout } = useAuth();
-  // const handleLogout = useHandleLogout();
-  const handleSetPage = useCallback((newPage: string) => {
-    setPage(newPage);
-  }, []);
+  const {
+    user: currUser,
+    checkUser,
+    combinedRole,
+    logout: handleLogout,
+  } = useAuth(false);
 
-  const { user: currUser, checkUser } = useAuth(false); // Disable automatic fetching
+  const hasPageAccess = combinedRole?.permissions.map((page) => page.page);
+
+  const FilteredNavLinks = NavLinks.filter((link) =>
+    hasPageAccess?.includes(link.pageName),
+  );
+
+  const FirstPage = hasPageAccess ? hasPageAccess[0] : undefined;
+
+  //useEffects
+  useEffect(() => {
+    if (FirstPage) setPage(FirstPage);
+  }, [FirstPage]);
 
   useEffect(() => {
     if (!currUser) {
@@ -38,7 +49,7 @@ export const Panel = () => {
       >
         <Sidebar
           className={styles.AppSidebar}
-          NavLinks={NavLinks}
+          NavLinks={FilteredNavLinks}
           currPage={currPage}
           logoutFunc={handleLogout}
         />
@@ -50,7 +61,7 @@ export const Panel = () => {
         <MainBody
           className={styles.AppContent}
           currContent={currPage}
-          setPage={handleSetPage}
+          setPage={setPage}
         />
       </div>
     </BreadcrumbProvider>

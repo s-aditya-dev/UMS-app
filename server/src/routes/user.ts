@@ -8,6 +8,9 @@ const router = express.Router();
 router.post("/", UserController.createUser);
 
 // Protect all other routes
+// Reset password
+router.post("/reset-password", verifyToken, UserController.resetPassword);
+
 // Get all users
 router.get("/", verifyToken, UserController.getAllUsers);
 

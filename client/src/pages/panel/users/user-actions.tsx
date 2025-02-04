@@ -8,30 +8,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthStore } from "@/store/auth";
+import { useAuth, useAuthStore } from "@/store/auth";
 import useUserStore, { useUpdateUser } from "@/store/users";
 import { CustomAxiosError } from "@/utils/types/axios";
-import { userType } from "@/utils/types/user";
+import { userType } from "@/store/users";
 import { Ellipsis } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAlertDialog } from "@/components/custom ui/alertDialog";
+import { hasPermission } from "@/hooks/use-role.ts";
 
 interface UserActionProps {
   user: userType;
-  showPass: string;
-  handleShowPass: (id: string) => void;
+  isDisabled: boolean;
 }
 
-export const UserAction = ({
-  user,
-  showPass,
-  handleShowPass,
-}: UserActionProps) => {
+export const UserAction = ({ user, isDisabled = true }: UserActionProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const updateUser = useUpdateUser();
   const { setSelectedUserId } = useUserStore();
   const { user: currUser } = useAuthStore();
+  const { combinedRole } = useAuth(false);
+
+  //Access for buttons
+  const showUserDetails = hasPermission(combinedRole, "Users", "read-details");
+  const showLockButton = hasPermission(combinedRole, "Users", "lock-user");
+
+  const hasAnyAccess = showUserDetails || showLockButton;
 
   const lockDialog = useAlertDialog({
     alertType: !user.isLocked ? "Danger" : "Success",
@@ -88,28 +91,45 @@ export const UserAction = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="miniIcon">
+          <Button
+            variant="secondary"
+            size="miniIcon"
+            className={
+              isDisabled || !hasAnyAccess ? "cursor-not-allowed" : undefined
+            }
+            disabled={isDisabled || !hasAnyAccess}
+          >
             <Ellipsis />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="mx-3">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleShowPass(user._id)}>
-            {showPass === user._id ? "Hide password" : "Show password"}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleOpenDetails(user._id)}>
-            Open Details
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() =>
-              lockDialog.show({ onAction: () => handleLockUser(user._id) })
-            }
-          >
-            {!user.isLocked ? "Lock user" : "Unlock User"}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
+        {/* Adding this for security purposes 
+        because anyone can manipulate dom and enable the disabled button */}
+        {!isDisabled && hasAnyAccess && (
+          <>
+            <DropdownMenuContent className="mx-3">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              {showUserDetails && (
+                <DropdownMenuItem onClick={() => handleOpenDetails(user._id)}>
+                  Open Details
+                </DropdownMenuItem>
+              )}
+
+              {showLockButton && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    lockDialog.show({
+                      onAction: () => handleLockUser(user._id),
+                    })
+                  }
+                >
+                  {!user.isLocked ? "Lock user" : "Unlock User"}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </>
+        )}
       </DropdownMenu>
       <lockDialog.AlertDialog />
     </>

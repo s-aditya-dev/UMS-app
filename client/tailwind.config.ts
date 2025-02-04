@@ -53,5 +53,10 @@ module.exports = {
       },
     },
   },
+  safelist: [
+    "grid-cols-[1fr,auto]",
+    "grid-cols-[1fr,auto,auto]",
+    "grid-cols-[1fr,auto,auto,auto]",
+  ],
   plugins: [require("tailwindcss-animate")],
 };

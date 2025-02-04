@@ -4,6 +4,7 @@
   },
   "scripts": {
     "dev": "concurrently \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
+    "seed": "pnpm --filter server run seed",
     "postinstall": "pnpm install --filter client && pnpm install --filter server"
   }
 }

@@ -1,22 +1,31 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/store/auth";
+import { CenterWrapper } from "@/components/custom ui/center-page";
+import { Loader } from "@/components/custom ui/loader";
 
 interface ProtectedRouteProps {
-  isAuthenticated: boolean;
-  redirectTo?: string;
-  children: JSX.Element;
+  children: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  isAuthenticated,
-  redirectTo = "/auth/login",
-  children,
-}) => {
-  if (!isAuthenticated) {
-    return <Navigate to={redirectTo} />;
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { user, isLoading } = useAuth(true);
+  const location = useLocation();
+
+  // If still loading authentication status, show loader
+  if (isLoading) {
+    return (
+      <CenterWrapper>
+        <Loader />
+      </CenterWrapper>
+    );
   }
 
-  return children;
-};
+  // If no user is logged in, redirect to login
+  if (!user) {
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
 
-export { ProtectedRoute };
+  // If authenticated, render children
+  return <>{children}</>;
+};

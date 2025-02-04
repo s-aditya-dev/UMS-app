@@ -1,11 +1,10 @@
 // UserForms.tsx
-import { Input } from "@/components/ui/input";
-import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { DatePickerV2 } from "@/components/custom ui/date-time-pickers";
+import { FormFieldWrapper } from "@/components/custom ui/form-field-wrapper";
 import { MultiSelect } from "@/components/custom ui/multi-select";
-import { userType } from "@/utils/types/user";
-import { useRoles } from "@/store/role";
-import { useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { useFilteredRoles } from "@/hooks/use-role";
+import { userType } from "@/store/users";
 
 interface UserFormProps {
   userData: Partial<userType>;
@@ -89,17 +88,7 @@ export const RolesForm = ({
   isEditable,
   onInputChange,
 }: UserFormProps) => {
-  const { rolesArray } = useRoles();
-
-  const roles = useMemo(() => {
-    if (rolesArray.data) {
-      return rolesArray.data.map((role) => ({
-        label: role,
-        value: role,
-      }));
-    }
-    return [];
-  }, [rolesArray]);
+  const roles = useFilteredRoles();
 
   return (
     <FormFieldWrapper
@@ -117,6 +106,24 @@ export const RolesForm = ({
         placeholder="Select participants"
         variant="inverted"
         maxCount={3}
+      />
+    </FormFieldWrapper>
+  );
+};
+
+export const UsernameForm = ({ userData }: { userData: Partial<userType> }) => {
+  return (
+    <FormFieldWrapper
+      LabelText="Username"
+      LabelFor="usernameField"
+      className="gap-3"
+    >
+      <Input
+        id="usernameField"
+        disabled
+        type="username"
+        value={userData.username}
+        readOnly
       />
     </FormFieldWrapper>
   );

@@ -1,5 +1,5 @@
 import { CenterWrapper } from "@/components/custom ui/center-page";
-import { ErrorDisplay } from "@/components/custom ui/error-display";
+import ErrorCard from "@/components/custom ui/error-display";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserTable } from "@/pages/panel/users/user-table";
@@ -9,9 +9,11 @@ import { useCallback, useEffect, useState } from "react";
 import { UserFooter } from "./user-footer";
 import { UserHeader } from "./user-header";
 import { UserSkeleton } from "./user-skeleton";
+import { useAuth } from "@/store/auth";
 
 export const UserList = () => {
   const { setBreadcrumbs } = useBreadcrumb();
+  const { logout: handleLogout } = useAuth(false);
   const {
     currentPage,
     itemsPerPage,
@@ -94,24 +96,28 @@ export const UserList = () => {
   }, [setBreadcrumbs]);
 
   if (isLoading) {
-    return (
-      <UserSkeleton />
-      // <CenterWrapper>
-      // </CenterWrapper>
-    );
+    return <UserSkeleton />;
   }
 
   if (error) {
     const { response, message } = error as CustomAxiosError;
     let errMsg = response?.data.error ?? message;
-    let needLogin = false;
-    if (errMsg === "Access denied. No token provided") {
+
+    if (errMsg === "Access denied. No token provided")
       errMsg = "Access denied. No token provided please login again";
-      needLogin = true;
-    }
+
+    if (errMsg === "Network Error")
+      errMsg =
+        "Connection issue detected. Please check your internet or try again later.";
+
     return (
       <CenterWrapper className="px-2 gap-2 text-center">
-        <ErrorDisplay errMsg={errMsg} isLoginRequired={needLogin} />
+        <ErrorCard
+          title="Error occured"
+          description={errMsg}
+          btnTitle="Go to Login"
+          onAction={handleLogout}
+        />
       </CenterWrapper>
     );
   }
@@ -125,7 +131,7 @@ export const UserList = () => {
       />
       <UserTable
         userList={data?.users || []}
-        firstIndex={paginationData?.firstIndex}
+        firstIndex={paginationData?.firstIndex ?? 0}
       />
       <UserFooter
         currPage={data?.currentPage || 0}
@@ -134,3 +140,5 @@ export const UserList = () => {
     </div>
   );
 };
+
+export default UserList;

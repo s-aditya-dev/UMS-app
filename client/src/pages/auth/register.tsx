@@ -11,12 +11,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useUser, useUpdateUser } from "@/store/users";
-import { userType } from "@/utils/types/user";
-import { CircleX } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { useUpdateUser, useUser } from "@/store/users";
+import { formatZodErrors } from "@/utils/func/zodUtils";
+import { userType } from "@/store/users";
+import { RegisterUserSchema } from "@/utils/zod-schema/user";
+import { CircleX } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { CustomAxiosError } from "@/utils/types/axios";
 
 export const RegisterForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,10 +30,9 @@ export const RegisterForm = () => {
   const [newUser, setNewUser] = useState<Partial<userType>>({
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
     phone: "",
-    dob: new Date(),
+    dob: undefined,
     settings: {
       isRegistered: true,
       isPassChange: false,
@@ -43,10 +45,9 @@ export const RegisterForm = () => {
         ...prevState,
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        username: user.username || "",
         email: user.email || "",
         phone: user.phone || "",
-        dob: user.dob ? new Date(user.dob) : new Date(),
+        dob: user.dob ? new Date(user.dob) : undefined,
       }));
     }
   }, [user]);
@@ -66,6 +67,17 @@ export const RegisterForm = () => {
   };
 
   const handleSubmit = async () => {
+    const validation = RegisterUserSchema.safeParse(newUser);
+    if (!validation.success) {
+      const errorMessages = formatZodErrors(validation.error.errors);
+      toast({
+        title: "Password Submission Error",
+        description: `Please correct the following errors:\n${errorMessages}`,
+        variant: "warning",
+      });
+      return;
+    }
+
     try {
       await updateUser.mutateAsync({
         userId: id!,
@@ -78,10 +90,11 @@ export const RegisterForm = () => {
       });
       navigate("/panel/");
     } catch (error) {
-      console.log(error);
+      const Err = error as CustomAxiosError;
+      console.log(Err);
       toast({
         title: "Error",
-        description: "Failed to complete registration",
+        description: `${Err.response?.data.error}`,
         variant: "destructive",
       });
     }

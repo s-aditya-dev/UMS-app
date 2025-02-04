@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import * as React from "react";
 import { Fragment } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface NavProps extends React.HTMLAttributes<HTMLElement> {
   currContent: string;
@@ -36,13 +36,13 @@ const Nav: React.FC<NavProps> = ({
   ...props
 }) => {
   // hooks
-  const navigate = useNavigate();
-  const handleSettings = () => {
-    navigate("/panel/settings");
-  };
-  const handleSupport = () => {
-    console.log("contacted Support");
-  };
+  // const navigate = useNavigate();
+  // const handleSettings = () => {
+  //   navigate("/panel/settings");
+  // };
+  // const handleSupport = () => {
+  //   console.log("contacted Support");
+  // };
 
   return (
     <nav
@@ -76,7 +76,7 @@ const Nav: React.FC<NavProps> = ({
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
+            {/* <DropdownMenuItem
               onClick={() => {
                 handleSettings();
               }}
@@ -90,7 +90,7 @@ const Nav: React.FC<NavProps> = ({
             >
               Support
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator /> */}
             <DropdownMenuItem onClick={() => logoutFunc()}>
               Logout
             </DropdownMenuItem>
