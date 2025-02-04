@@ -1,4 +1,4 @@
-<h1 style="text-align:center;">✨ User Management System (UMS) ✨</h1>
+<h1 align="center">✨ User Management System (UMS) ✨</h1>
 <h2>🚀 Introduction</h2>
 <p>UMS (User Management System) is a <b>MERN</b>-based starter template designed for full-stack projects requiring a robust user and role management system. It provides authentication, dynamic role-based permissions, and a structured way to manage users. The project utilizes <b>ShadCN</b> and <b>Tailwind CSS</b> for the UI, with <b>TypeScript</b> on both frontend and backend.</p>
 
